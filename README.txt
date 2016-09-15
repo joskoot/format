@@ -6,5 +6,3 @@ Example:
 (my-fmt 1 2 3)
 Prints:
   1  2  3
-  
-  
