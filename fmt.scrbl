@@ -14,11 +14,13 @@
   (define red (style #f (list prop:red)))
   (element red str))
 
+@(define(minus) (element 'tt "-"))
+
 @section{Rationale}
 
 Simple formatting tools can be useful when readability of output for the human eye is of some
 importance, but not to the extent that a highly finished presentation is required.
-An example of a simple formatter for
+An example of a simple formatter of
 @(hyperlink #:underline? #t "http://racket-lang.org/" "Racket")
 is procedure @racket[format].
 It is a handy tool, but in some cases may not provide enough functionality.
@@ -37,11 +39,17 @@ combines some of the powerful features of the format-statement of
 @(hyperlink #:underline? #t "http://en.wikipedia.org/wiki/Fortran" "Fortran")
 with the flexibility of Racket’s generic procedures @racket[write] and @racket[display].
 The principles are simple enough to get started almost immediately.
-Nevertheless tools for padding, tabulation, several numerical formats, literals, iteration and
-compound and conditional instructions are included.
+Nevertheless tools for @seclink["Padding" "padding"],
+@seclink["Tabulation" "tabulation"],
+several @seclink["numerical" "numerical formats"],
+@seclink["literal" "literals"],
+@seclink["iteration" "iteration"] and
+@seclink["compound" "compound"] and
+@seclink["condition" "conditional"] instructions are included.
 Field widths, tabulator positions and repetition counts can be constants within the format,
 but can also be obtained from the data.
-@red{Warning}: padding and tabulation are implemented by insertion of spaces and
+@red{Warning}: @seclink["Padding" "padding"]
+and @seclink["Tabulation" "tabulation"] are implemented by insertion of spaces and
 therefore require a fixed width character font,
 such as @(hyperlink #:underline? #t "http://en.wikipedia.org/wiki/Courier_(typeface)" "Courier"),
 in order to function properly.
@@ -102,49 +110,47 @@ because the produced output is gathered in a string before being committed to th
 
 @section{Format-procedure calls}
 
-@defproc[
+@defproc*[
  #:kind "" #:link-target? #f
- ((fmt
-   (format (or/c string? fmt?)) ...
-   (port (or/c output-port? 'string 'str 'current 'cur) 'string))
-  (datum any/c) ...)
- (or/c void? string?)]
-
-@defproc[
- #:kind "" #:link-target? #f
- ((fmt
-   (format (or/c string? fmt?)) ...
-   (port (or/c 'argument 'arg)))
-  (port-arg (or/c output-port? 'string 'str 'current 'cur))
-  (datum any/c) ...)
- (or/c void? string?)]{When @racket[fmt] is called with @racket[port]-argument
+ ([((fmt
+     (format (or/c string? fmt?)) ...
+     (port (or/c output-port? 'string 'str 'current 'cur) 'string))
+    (datum any/c) ...)
+   (or/c void? string?)]
+  [((fmt
+    (format (or/c string? fmt?)) ...
+    (port (or/c 'argument 'arg)))
+    (port-arg (or/c output-port? 'string 'str 'current 'cur))
+    (datum any/c) ...)
+   (or/c void? string?)])]{
+ When @racket[fmt] is called with @racket[port]-argument
  @racket['argument] or @racket['arg]
  the produced format-procedure requires the data to be preceded by a @racket[port-arg]ument.
  
  In both forms the format-procedure formats the data according to the
  @racket[format]-arguments from which it was built and
  the formatted data are sent through an output-port or returned as a string as indicated
- by the @racket[port]- cq @racket[port-arg]ument.
+ by argument @racket[port] cq @racket[port-arg].
  If the results are to be committed to an output-port,
  this port is checked to be open before starting formatting.
  
  @itemlist[
  (list
-  @item{If the @racket[port]- cq @racket[port-arg]-ument is
+  @item{If the argument @racket[port] cq @racket[port-arg] is
    @racket['current] or @racket['cur],
    the formatted data are committed to the current output-port
    and the format-procedure returns void.
    For this purpose parameter @racket[current-output-port] is consulted at the time the
    format-procedure is called,
    not at the time the format-procedure is made by procedure @racket[fmt].}
-  @item{If the @racket[port]- cq @racket[port-arg]-ument is
+  @item{If the argument @racket[port] cq @racket[port-arg] is
    an output-port, the formatted data are committed to this port
    and the format-procedure returns void.
   A format-procedure made with
   @nonbreaking{(@racket[fmt] (@racket[current-output-port]) @racket[format] ...)}
   commits the formatted data to the @racket[current-output-port] as found in this parameter
   at the time the format-procedure was made.}
-  @item{If the @racket[port]- cq @racket[port-arg]-ument is
+  @item{If the argument @racket[port] cq @racket[port-arg] is
    @racket['string] or @racket['str],
    the formatted data are returned as a string.})]}
 
@@ -213,9 +219,6 @@ but with much less flexibility. The benefits would be small,
 for parsing and translation take only a small fraction of the time of the formatting proper,
 even when no hashes would be used.
 
-@margin-note{@element["sroman"]{@smaller{
- Todo: adapt module "fmt.rkt" such as to allow the garbage collector
- to remove the hash-tables when they no longer are needed.}}}
 @defproc[(fmt-clear-hash) void?]{
  Empties the hash tables used by @racket[fmt].
  For example, when defining all format-procedures in a separate module,
@@ -305,16 +308,16 @@ For example:
 
 @racket[((fmt "5(?;d!x)") 1 2 3)] → @racket["1 2 3"]
 
-In the above example @racket{5} indicates that in principle 5 datums are expected.
-However, the instruction @racket{?;} makes sure that the format-procedure does generate
-the output and exits normally when less than @racket[5] datums are found.
+In the above example @racket{5} indicates that in principle 5 data are expected.
+However, @racket{?;} makes sure that the format-procedure does generate
+the output and exits normally when less than @racket[5] data are found.
 
 @subsection[#:tag "arguments"]{Instruction arguments}
 
 In the description of the instructions, ξ represents an argument consisting of an instruction.
 ν, μ and ε represent numerical arguments such as a field width or a tabulator position.
-Omitted numerical arguments are zero.
 A repetition count has the same form as a numerical argument.
+Omitted numerical arguments are zero. An omitted repetition count is one.
 They can have one of the following three forms:
 
 @tabular[
@@ -409,7 +412,7 @@ the instructions @seclink["D" "D"]
 @seclink["B" "B"],
 @seclink["O" "O"],
 @seclink["H" "H"] and
-@seclink["=" @bold["="]].
+@seclink["=" @bold{@bold{@larger["="]}}].
 When padding is switched on,
 these instructions add heading and/or trailing spaces
 if otherwise less characters would be generated than indicated by the field width.
@@ -491,25 +494,31 @@ Because within a literal,
 two adjacent single quotes are read as one single quote being part of the literal,
 a separator is required between two adjacent literals when the second one is of the
 @seclink["simple-literal" "first form"].
-@red{Warning}: in the arguments of procedure @racket[fmt],
-@literal{'κ ...'} must not be split over two or more format-strings.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the real results they are spaces, of course.}}}
 
 @code{((fmt "R10'Article','Price'"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}
 
-@code{((fmt "^'Article◦Price'R10◦2D"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}
+@code{((fmt "^'Article Price'R10 2D"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}
 
-@code{((fmt"''''"))} → @code{"'"}
+@code{((fmt "L2 ''''"))} → @code{"◦'"}
+
+@code{((fmt "L2 '' ''"))} → @code{"◦◦◦◦"}
 
 @code{((fmt 'cur "'\\'"))} → void, displays \
+
+@code{((fmt 'cur "'\"\\\"'"))} → void, displays @element['tt "\"\\\""]
+
+@red{Warning}: in the arguments of procedure @racket[fmt],
+@literal{'κ ...'} must not be split over two or more format-strings.
+For example, the following raises an exception:
 
 @interaction/no-prompt[
  (require "fmt.rkt")
  (fmt "'Article" "Price'")]
 
-@subsection{Numerical formats}
+@subsection[#:tag "numerical"]{Numerical formats}
 
 The numerical format-instructions @code{I}, @code{F} and @code{E} have their own padding,
 independent from the @seclink["Padding" "padding"] mode described elsewhere in this document.
@@ -548,7 +557,7 @@ In the real results they are spaces, of course.}}}
 
 @code{((fmt "I") -1.0e1000000)} → @code{"-inf.0"}
 
-@code{((fmt "I") (/ 0.0 0.0))} → @code{"+nan.0"}
+@code{((fmt "I10") (/ 0.0 0.0))} → @code{"◦◦◦◦+nan.0"}
 
 @code{(string-length ((fmt "I") #e1e100000))} → @code{100001}
 
@@ -669,13 +678,16 @@ as shown in the following example:
 @subsection{Sign mode}
 The sign mode is relevant for the numerical instructions @seclink["I" "I"],
 @seclink["F" "F"], @seclink["E" "E"], @seclink["B" "B"], @seclink["O" "O"], @seclink["H" "H"] and
-@seclink["=" @bold["="]].
+@seclink["=" (bold (bold "="))].
 When sign mode is off, positive numbers get no sign.
 When sign mode is on, positive numbers, exact zero and @code{+0.0} get a plus sign.
 Negative numbers always get a minus sign, @code{-0.0} included.
 Instructions @seclink["I" "I"], @seclink["F" "F"] and @seclink["E" "E"]
 may round the number such as to fit the width of the fraction.
 If rounding a negative number yields zero, the minus sign is retained.
+Notice that the @racketlink[exact-integer? "exact integer number"]
+@(minus)0 has no sign. It is the same as @literal["+"]0
+(in the sense of @racket[eq?]).
 When a format-procedure is called from another format-procedure,
 the former inherits the sign mode from the latter.
 If the called procedure alters the sign mode,
@@ -684,15 +696,11 @@ Instruction @seclink["$" "$"] can be used to restore the previous sign mode.
 
 @subsubsub*section[#:tag "+" @larger["+"]]
 Switches sign mode on.
-@subsubsub*section[#:tag "-" @larger{@larger{@bold{@code{-}}}} " (minus sign)"]
+@subsubsub*section[#:tag "-"]{@bold{@larger[(larger (minus))]} (minus sign)}
 Switches sign mode off.
 @subsubsub*section[#:tag "$" "$"@larger{ξ}]
 Memorizes the current sign mode,
 executes instruction ξ and upon completion restores the memorized sign mode.
-
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-Example: @code{((fmt "+ F6.2 $(-F6.2) F6.2") 3.4 3.4 3.4)} → @code{"◦+3.40◦◦3.40◦+3.40"}
 
 @subsection{Tabulation}
 Tabulator instructions reposition the write head within or beyond the end of the current line.
@@ -1045,8 +1053,9 @@ Zero, @code{+0.0} and @code{-0.0} included, are treated as @code{0}.
 @subsubsub*section[#:tag "\\" "\\\\"]
 
 A single back-slash, but within a string an escaping backs-slash is required.
-Consumes a datum, which must be a number but not exact zero.
+Consumes a datum, which must be a number.
 The number is consumed and its @code{magnitude} and @code{angle} are added to the remaining data.
+The magnitude and angle of exact zero are zero.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the real results they are spaces, of course.}}}
@@ -1074,7 +1083,8 @@ displays:
 where @code{18014398509481984} = @code{(expt 2 54)}.
 
 @interaction/no-prompt[(require "fmt.rkt")
-((fmt "\\dxd") 0)]
+((fmt "\\dxd") 0)
+((fmt "\\dxd") 0.0)]
 
 @subsection{Procedure calls}
 
@@ -1155,7 +1165,8 @@ The purpose of the procedure is to display a detailed bill.
 
 → void and displays:
 
-@verbatim{----------------------------------------
+@verbatim{
+----------------------------------------
    article    number  price pp     total
 ----------------------------------------
      chair         4     50.00    200.00
@@ -1263,4 +1274,5 @@ with its base at the bottom and all other lines centred above the bottom line.
   (list @secref[#:underline? #f]{_νμξξ} "Iteration")
   (list @secref[#:underline? #f]{λ} "Call procedure")
   (list @secref[#:underline? #f]{sel} "Instruction selector"))]
-@verbatim[""]
+
+@larger{@larger{@@bold{The end}}}
