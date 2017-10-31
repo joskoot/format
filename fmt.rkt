@@ -882,7 +882,7 @@
    ((month) (vector-ref months month))
    ((tzh tzm) (quotient/remainder (round (/ time-zone 60)) 60))
    ((tzm) (abs tzm)))
-  (push-data run-state week-day day month year hour minute second tzh tzm)
+  (push-data run-state week-day day month (modulo year 10000) hour minute second tzh tzm)
   (date-instr-fmt run-state)))
 
 (define date-time-components
@@ -901,6 +901,9 @@
    (let*
     ((datum
       (pop-datum run-state natural-or-false? "natural number or false"))
+     (dummy (when (and datum (>= datum (expt 2 32)))
+             (error 'fmt "too large argument for instruction G: ~s"
+      datum)))
      (date/time (seconds->date (or datum (current-seconds)))))
     (map (λ (selector) (selector date/time)) selectors)))))
 
@@ -972,9 +975,9 @@
 
 (define (magnitude/angle-instr run-state)
  (let* ((datum (pop-datum run-state number? "number")))
-  (when (and (exact? datum) (zero? datum))
-   (error 'fmt "Instr \\ (magnitude/angle) does not accept exact zero"))
-  (push-data run-state (magnitude datum) (angle datum))))
+  (if (and (exact? datum) (zero? datum))
+   (push-data run-state 0 0)
+   (push-data run-state (magnitude datum) (angle datum)))))
 
 ;===================================================================================================
 ; Section 5
