@@ -291,9 +291,9 @@ Example:
 In this example instruction @seclink{%} consumes the datum @code{-30/40} and adds
 the numerator @code{-3} and denominator @code{4} to the list of remaining data,
 which in this case is empty.
-The first @nb{@seclink{D}-instruction} displays the numerator.
+The first @nonbreaking{@seclink{D}-instruction} displays the numerator.
 The @seclink["simple-literal"]{literal} @code{"':'"} displays the colon.
-The second @nb{@seclink{D}-instruction} displays the denominator.
+The second @nonbreaking{@seclink{D}-instruction} displays the denominator.
 The output is collected in a string. This string is returned.
 
 When you do want the format procedure to return normally when given more data than consumed,
