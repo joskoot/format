@@ -1,8 +1,12 @@
 #lang scribble/manual
 @(require scribble/eval scribble/core (for-label "fmt.rkt" racket) racket)
+(define (/cdot/) "·")
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
+
+@(define (inset . x) (apply nested #:style 'inset x))
+@(define (note . x) (inset (apply smaller x)))
 
 @(define-syntax (example stx)
   (syntax-case stx ()
@@ -16,14 +20,16 @@
 
 @(define(minus) (element 'tt "-"))
 
+@(define-syntax-rule (ignore x ...) (void))
+
 @section{Rationale}
 
-Simple formatting tools can be useful when readability of output for the human eye is of some
+Simple formatting tools can be useful when readability for the human eye is of some
 importance, but not to the extent that a highly finished presentation is required.
-An example of a simple formatter of
+@nonbreaking{An example} of a simple formatter of
 @(hyperlink #:underline? #t "http://racket-lang.org/" "Racket")
 is procedure @racket[format].
-It is a handy tool, but in some cases may not provide enough functionality.
+It is a handy tool, @nonbreaking{but in some} cases may not provide enough functionality.
 Module
 @(hyperlink
   (string-append
@@ -72,7 +78,9 @@ because the produced output is gathered in a string before being committed to th
          (and/c procedure? fmt?)]{
  Procedure @racket[fmt] returns a procedure, in particular a format-procedure,
  satisfying predicate @racket[fmt?] which implies satisfying predicate @racket[procedure?].
- The @racket[port]-argument can be placed at arbitrary position before,
+
+ The @racket[port]-argument passed to procedure @racket[fmt]
+ can be placed at arbitrary position before,
  among or after the @racket[format]-arguments.
  The symbols @racket['string], @racket['current] and @racket['argument] can be abbreviated as
  @racket['str], @racket['cur] and @racket['arg].
@@ -92,40 +100,25 @@ because the produced output is gathered in a string before being committed to th
  as a compound instruction without being parsed or translated again.
  The @racket[port]s of the inserted format-procedures are ignored.}
 
-@defproc[#:kind "predicate" (fmt? (object any/c)) boolean?]{
- Returns @racket[#t] if the argument is a format-procedure made by procedure @racket[fmt],
- else @racket[#f].}
+Format-procedures are called as follows:
 
-@defproc[#:kind "procedure" (fmt-port (format-procedure fmt?))
-         (or/c output-port? 'current 'string 'argument)]{
- Returns the @italic{@code{port}}-argument with which the @racket[format-procedure]
- was made by means of procedure @racket[fmt].
- Returns symbol @racket['string] if @racket[fmt] was called without @italic{@code{port}}-argument.
- Abbreviations @racket['str], @racket['cur] and @racket['arg] are reported in their full forms,
- id est, @racket['string], @racket['current] and @racket['argument]. Examples:}
-
-@code{(fmt-port (fmt 'cur))}  →  @code{current}
-
-@code{(fmt-port (fmt (open-output-string)))} → @racketfont{#<output-port:string>}
-
-@section{Format-procedure calls}
-
-@defproc*[
- #:kind "" #:link-target? #f
- ([((fmt
+@defproc[#:kind "" #:link-target? #f
+ ((fmt
      (format (or/c string? fmt?)) ...
      (port (or/c output-port? 'string 'str 'current 'cur) 'string))
     (datum any/c) ...)
    (or/c void? string?)]
-  [((fmt
-    (format (or/c string? fmt?)) ...
-    (port (or/c 'argument 'arg)))
+@defproc[#:kind "" #:link-target? #f
+    ((fmt
+     (format (or/c string? fmt?)) ...
+     (port (or/c 'argument 'arg)))
     (port-arg (or/c output-port? 'string 'str 'current 'cur))
     (datum any/c) ...)
-   (or/c void? string?)])]{
- When @racket[fmt] is called with @racket[port]-argument
- @racket['argument] or @racket['arg]
- the produced format-procedure requires the data to be preceded by a @racket[port-arg]ument.
+   (or/c void? string?)]{
+
+When @racket[fmt] is called with @racket[port]-argument
+@racket['argument] or @racket['arg]
+the produced format-procedure requires the data to be preceded by a @racket[port-arg]ument.
  
  In both forms the format-procedure formats the data according to the
  @racket[format]-arguments from which it was built and
@@ -155,26 +148,17 @@ because the produced output is gathered in a string before being committed to th
    the formatted data are returned as a string.})]}
 
 Examples:
-
 @margin-note{@element["sroman"]{@smaller{In these examples instruction @seclink["I" "I5"]
- takes an integer number
- and displays it right justified in a field of 5 characters.
- 
- In the results `◦´ is used to show spaces.
- In the real results they are spaces, of course.}}}
-
-@racket[((fmt "I5") 12)] → @code{"◦◦◦12"}
-
-@racket[((fmt "I5" 'string) 12)] → @code{"◦◦◦12"}
-
-@racket[((fmt "I5" 'current) 12)] → void, displays @code["◦◦◦12"]
-
-@racket[((fmt "I5" (current-output-port)) 12)] → void, displays @code["◦◦◦12"]
-
-@racket[((fmt "I5" 'argument) 'string 12)] → @code{"◦◦◦12"}
-
-@racket[((fmt "I5" 'argument) 'current 12)] → void, displays @code["◦◦◦12"]
-
+ is given exact integer numbers
+ and displays them right justified in fields of 5 characters.@(linebreak)
+ In the results `◦´ is used to show spaces.@(linebreak)
+ In the results proper they are spaces, of course.}}}
+@racket[((fmt "I5") 12)] → @code{"◦◦◦12"}@(linebreak)
+@racket[((fmt "I5" 'string) 12)] → @code{"◦◦◦12"}@(linebreak)
+@racket[((fmt "I5" 'current) 12)] → void, displays @code["◦◦◦12"]@(linebreak)
+@racket[((fmt "I5" (current-output-port)) 12)] → void, displays @code["◦◦◦12"]@(linebreak)
+@racket[((fmt "I5" 'argument) 'string 12)] → @code{"◦◦◦12"}@(linebreak)
+@racket[((fmt "I5" 'argument) 'current 12)] → void, displays @code["◦◦◦12"]@(linebreak)
 @racket[((fmt "I5" 'argument) (current-output-port) 12)] → void, displays @code["◦◦◦12"]
 
 Forgetting the @italic{@racket[port-arg]}ument when calling a format-procedure made with
@@ -184,7 +168,24 @@ or may produce unexpected results:
 @interaction/no-prompt[
  (require "fmt.rkt")
  (define my-fmt (fmt "I5" 'argument))
- (my-fmt 12)]
+ (my-fmt 12)
+ ((fmt 'arg "D") (open-output-string))]
+
+@defproc[#:kind "predicate" (fmt? (object any/c)) boolean?]{
+ Returns @racket[#t] if the argument is a format-procedure made by procedure @racket[fmt],
+ else @racket[#f].}
+
+@defproc[#:kind "procedure" (fmt-port (format-procedure fmt?))
+         (or/c output-port? 'current 'string 'argument)]{
+ Returns the @italic{@code{port}}-argument with which the @racket[format-procedure]
+ was made by means of procedure @racket[fmt].
+ Returns symbol @racket['string] if @racket[fmt] was called without @italic{@code{port}}-argument.
+ Abbreviations @racket['str], @racket['cur] and @racket['arg] are reported in their full forms,
+ id est, @racket['string], @racket['current] and @racket['argument]. Examples:}
+
+@code{(fmt-port (fmt 'cur))}  →  @code{current}@(linebreak)
+@code{(fmt-port (fmt (open-output-string)))} → @racketfont{#<output-port:string>}@(linebreak)
+@code{(fmt-port (fmt (current-output-port)))} → @racketfont{#<output-port>}
 
 @section[#:tag "avoid"]{Repeated parsing and translation avoided}
 
@@ -197,18 +198,18 @@ when called repeatedly with the same arguments.
 For this purpose it uses two hashes with the arguments as keys and
 the produced format-procedures or subprocedures as values.
 
-@code{(define port (open-output-nowhere))}@linebreak[]
+@inset{@code{(define port (open-output-nowhere))}@linebreak[]
 @code{(define my-fmt (fmt port "f17.15/"))}@linebreak[]
-@code{(for ((i (in-range #e1e6))) (my-fmt (random)))}
+@code{(for ((i (in-range #e1e6))) (my-fmt (random)))}}
 
 is not much faster than:
 
-@code{(define port (open-output-nowhere))}@linebreak[]
-@code{(for ((i (in-range #e1e6))) ((fmt port "f17.15/") (random)))}
+@inset{@code{(define port (open-output-nowhere))}@linebreak[]
+@code{(for ((i (in-range #e1e6))) ((fmt port "f17.15/") (random)))}}
 
 In the last example, @racket["f17.15/"] is parsed and translated once only.
 
-@racket[fmt] can be implemented more efficiently by replacing it by a
+@ignore{@racket[fmt] can be implemented more efficiently by replacing it by a
 syntax that does the parsing and translation once when a program is compiled. In this form it
 would not parse and translate the format-strings each time a program is run.
 However, this would restrict @racket[fmt] to information available at expansion time only.
@@ -217,7 +218,7 @@ that are computed at run-time.
 Given procedure @racket[fmt] it is possible to construct a syntactic form,
 but with much less flexibility. The benefits would be small,
 for parsing and translation take only a small fraction of the time of the formatting proper,
-even when no hashes would be used.
+even when no hashes would be used.}
 
 @defproc[(fmt-clear-hash) void?]{
  Empties the hash tables used by @racket[fmt].
@@ -250,11 +251,13 @@ Separators, id est white space and commas, are irrelevant except in the followin
   @seclink["arguments" "numerical arguments"].
   These arguments may be omitted starting from the last one.
   However, when omitting one or more numerical arguments where the next instruction
-  starts with a token that can be interpreted as a numerical argument,
+  starts with a token that can be interpreted as a numerical argument, such as a repetition count,
   a comma is required as separator, optionally preceded and/or followed by other separators.
   Hence, no comma must appear before any numerical argument belonging to the preceding instruction.
   White space is required between two numerical arguments if the first character of the second one
-  could be parsed as belonging to the previous one.}
+  could be parsed as belonging to the previous one.
+ Commas do no harm when the argument or arguments of the instruction are format-instructions,
+ because these never are optional.}
   
   @item{The start and end of a @seclink["literal" "literal"]
   are marked by a single quote, but within a literal two
@@ -262,8 +265,8 @@ Separators, id est white space and commas, are irrelevant except in the followin
   Hence, where a literal is followed by another literal, a separator is required.}
   
   @item{Character @code{#\null} is not white space.
-   It must not appear outside @seclink["literal" "literals"],
-   but I don't think @code{#\null} can be useful within literals.})]
+   It must not appear outside @seclink["literal" "literals"].@(linebreak)
+   Advice: never use @code{#\null} or its equivalents such as @racket["\u0"] in a format string.})]
 
 @section[#:tag "fmt-instructions"]{Format-instructions}
 
@@ -286,15 +289,15 @@ the numerator becoming the first datum, the denominator the second one.
 Subsequent format-instructions can treat the numerator and denominator separately.
 Example:
 
-@code{((fmt "%D':'D") -30/40)} → @code{"-3:4"}
+@code{((fmt "%I':'I") 30/-40)} → @code{"-3:4"}
 
-In this example instruction @seclink{%} consumes the datum @code{-30/40} and adds
-the numerator @code{-3} and denominator @code{4} to the list of remaining data,
-which in this case is empty.
-The first @nonbreaking{@seclink{D}-instruction} displays the numerator.
-The @seclink["simple-literal"]{literal} @code{"':'"} displays the colon.
-The second @nonbreaking{@seclink{D}-instruction} displays the denominator.
-The output is collected in a string. This string is returned.
+In this example instruction @seclink{%} consumes the datum @racket[30/-40] and adds
+the numerator @racket[-3] and denominator @racket[4] to the list of remaining data,
+which in this example is empty.@(linebreak)
+The first @nonbreaking{@seclink["I"]{I-instruction}} displays the numerator.
+The @seclink["simple-literal"]{literal} @code{"':'"} displays the colon.@(linebreak)
+The second @nonbreaking{@seclink["I"]{I-instruction}} displays the denominator.
+The output is collected in a string. @nonbreaking{This string is returned.}
 
 When you do want the format procedure to return normally when given more data than consumed,
 add @tt{"}@seclink["*ξ" "*"]@seclink["S" "S"]@tt{"} as the last format-instruction.
@@ -344,13 +347,13 @@ A period without immediately preceding decimal figure is\ninterpreted as zero.")
     "). This number is used as numerical argument or repetition count."]))]
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "I5") 12)} → @code{"◦◦◦12"} integer format, field width 5.
-
+@code{((fmt "I5") 12)} → @code{"◦◦◦12"} integer format, field width 5.@(linebreak)
 @code{((fmt "I5.3") 12)} → @code{"◦◦012"} integer format, field width 5, at least 3 decimal figures.
-
-@code{((fmt "I##") 5 3 12)} → @code{"◦◦012"} idem taking the arguments from the data.
+@(linebreak)
+@code{((fmt "I##") 5 3 12)} → @code{"◦◦012"} idem taking the arguments from the data.@(linebreak)
+@code{((fmt "#'x'") 5)} → @code{"xxxxx"} taking the repetition count from the data.
 
 @subsection{Elementary format-instructions}
 
@@ -393,20 +396,17 @@ See @seclink["Tabulation" "tabulation"].
 Executes a newline instruction only if not at the start of the current line.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-
-@code{((fmt 'current "DXDXD")   "Jacob" 3 #\x)} → void, displays @code{Jacob◦3◦x}
-
-@code{((fmt 'current "WXWXW")   "Jacob" 3 #\x)} → void, displays @code{"Jacob"◦3◦#\x}
-
-@code{((fmt 'current "D") (list "Jacob" 3 #\x))} → void, displays @code{(Jacob◦3◦x)}
-
+In the results proper they are spaces, of course.}}}
+@code{((fmt 'current "DXDXD")   "Jacob" 3 #\x)} → void, displays @code{Jacob◦3◦x}@(linebreak)
+@code{((fmt 'current "WXWXW")   "Jacob" 3 #\x)} → void, displays @code{"Jacob"◦3◦#\x}@(linebreak)
+@code{((fmt 'current "D") (list "Jacob" 3 #\x))} → void, displays @code{(Jacob◦3◦x)}@(linebreak)
 @code{((fmt 'current "W") (list "Jacob" 3 #\x))} → void, displays @code{("Jacob"◦3◦#\x)}
 
-@subsection{Padding}
+@subsection[#:tag "Padding"]{Padding}
 
 Padding applies to @seclink["literal" "literal data"] and
-the instructions @seclink["D" "D"]
+the instructions
+@seclink["D" "D"],
 @seclink["W" "W"],
 @seclink["P" "P"],
 @seclink["B" "B"],
@@ -455,18 +455,12 @@ Memorizes the current padding mode and field width,
 executes instruction ξ and upon completion restores the memorized padding mode and field width.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-
-@code{((fmt "L5*D") 1 2 3)} → @code{"1◦◦◦◦2◦◦◦◦3◦◦◦◦"}
-
-@code{((fmt "R5*D") 1 2 3)} → @code{"◦◦◦◦1◦◦◦◦2◦◦◦◦3"}
-
-@code{((fmt "C5*D") 1 2 3)} → @code{"◦◦1◦◦◦◦2◦◦◦◦3◦◦"}
-
-@code{((fmt "N  D") "◦◦Jacob◦◦")} → @code{"◦◦Jacob◦◦"} ; no spaces removed, nor added.
-
-@code{((fmt "L0 D") "◦◦Jacob◦◦")} → @code{"Jacob"} ; spaces removed, no spaces added.
-
+In the results proper they are spaces, of course.}}}
+@code{((fmt "L5*D") 1 2 3)} → @code{"1◦◦◦◦2◦◦◦◦3◦◦◦◦"}@(linebreak)
+@code{((fmt "R5*D") 1 2 3)} → @code{"◦◦◦◦1◦◦◦◦2◦◦◦◦3"}@(linebreak)
+@code{((fmt "C5*D") 1 2 3)} → @code{"◦◦1◦◦◦◦2◦◦◦◦3◦◦"}@(linebreak)
+@code{((fmt "N  D") "◦◦Jacob◦◦")} → @code{"◦◦Jacob◦◦"} ; no spaces removed, nor added.@(linebreak)
+@code{((fmt "L0 D") "◦◦Jacob◦◦")} → @code{"Jacob"} ; spaces removed, no spaces added.@(linebreak)
 @code{((fmt "L8 D") "◦◦Jacob◦◦")} → @code{"Jacob◦◦◦"} ; spaces first removed, then added.
 
 @subsection[#:tag "literal" "Literal data"]
@@ -478,6 +472,11 @@ except that a single quote must be written as two immediately adjacent single qu
 Backslashes and double quotes must be escaped by backslashes as usual in a string,
 id est, as @literal{\\} or @literal{\"}.
 The string @literal{"κ ..."} is displayed according to the current padding mode.
+In literals the backslash can also be used for other escapes, for example:
+
+@interaction[
+(require "fmt.rkt")
+((fmt "'a\nb'" 'cur))]
 
 @subsubsub*section[#:tag "compound-literal" @larger[@literal["^'κ ...'"]]]
 
@@ -496,18 +495,12 @@ a separator is required between two adjacent literals when the second one is of 
 @seclink["simple-literal" "first form"].
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-
-@code{((fmt "R10'Article','Price'"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}
-
-@code{((fmt "^'Article Price'R10 2D"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}
-
-@code{((fmt "L2 ''''"))} → @code{"◦'"}
-
-@code{((fmt "L2 '' ''"))} → @code{"◦◦◦◦"}
-
-@code{((fmt 'cur "'\\'"))} → void, displays \
-
+In the results proper they are spaces, of course.}}}
+@code{((fmt "R10'Article','Price'"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}@(linebreak)
+@code{((fmt "^'Article Price'R10 2D"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}@(linebreak)
+@code{((fmt "L2 ''''"))} → @code{"◦'"}@(linebreak)
+@code{((fmt "L2 '' ''"))} → @code{"◦◦◦◦"}@(linebreak)
+@code{((fmt 'cur "'\\'"))} → void, displays \@(linebreak)
 @code{((fmt 'cur "'\"\\\"'"))} → void, displays @element['tt "\"\\\""]
 
 @red{Warning}: in the arguments of procedure @racket[fmt],
@@ -521,12 +514,12 @@ For example, the following raises an exception:
 @subsection[#:tag "numerical"]{Numerical formats}
 
 The numerical format-instructions @code{I}, @code{F} and @code{E} have their own padding,
-independent from the @seclink["Padding" "padding"] mode described elsewhere in this document.
+independent from the padding mode described @seclink["Padding" "elsewhere"] in this document.
 
 @subsubsub*section[#:tag "I" "I"@larger{νμ}]
 
 Instruction @code{I} is particularly useful for integer numbers,
-but nevertheless accepts any real number.
+but nevertheless accepts every real number.
 It consumes and displays a real number rounded to an integer number.
 First the sign of the datum is determined.
 Subsequently the datum is rounded to an exact integer number.
@@ -540,25 +533,16 @@ The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
 They are right justified in a field of at least ν characters. Examples: 
 
 @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-@code{((fmt "*I3") 2 3.4 5.6)} → @code{"◦◦2◦◦3◦◦6"}
-
-@code{((fmt "*I3.2") 2 3.4 5.6)} → @code{"◦02◦03◦06"}
-
-@code{((fmt "I") 0.1)} → @code{"0"}
-
-@code{((fmt "I") -0.1)} → @code{"-0"}
-
-@code{((fmt "I") 1.0e-100000)} → @code{"0"}
-
-@code{((fmt "I") -1.0e-100000)} → @code{"-0"}
-
-@code{((fmt "I")  1.0e1000000)} → @code{"+inf.0"}
-
-@code{((fmt "I") -1.0e1000000)} → @code{"-inf.0"}
-
-@code{((fmt "I10") (/ 0.0 0.0))} → @code{"◦◦◦◦+nan.0"}
-
+In the results proper they are spaces, of course.}}}
+@code{((fmt "*I3") 2 3.4 5.6)} → @code{"◦◦2◦◦3◦◦6"}@(linebreak)
+@code{((fmt "*I3.2") 2 3.4 5.6)} → @code{"◦02◦03◦06"}@(linebreak)
+@code{((fmt "I") 0.0)} → @code{"0"}@(linebreak)
+@code{((fmt "I") -0.0)} → @code{"-0"}@(linebreak)
+@code{((fmt "I") 1.0e-100000)} → @code{"0"}@(linebreak)
+@code{((fmt "I") -1.0e-100000)} → @code{"-0"}@(linebreak)
+@code{((fmt "I")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
+@code{((fmt "I") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
+@code{((fmt "I10") (/ 0.0 0.0))} → @code{"◦◦◦◦+nan.0"}@(linebreak)
 @code{(string-length ((fmt "I") #e1e100000))} → @code{100001}
 
 @subsubsub*section[#:tag "F" "F"@larger{νμ}]
@@ -573,20 +557,16 @@ The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
 They are right justified in a field of at least ν characters. Examples: 
 
 @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-@code{((fmt "*F3  ") 2 3.4 5.6)} → @code{"◦2.◦3.◦6."}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "*F5.2") 2 3.4 5.6)} → @code{"◦2.00◦3.40◦5.60"}
-
-@code{((fmt "F.4") 2/3)} → @code{"0.6667"}
-
-@code{((fmt "D") 2/3)} → @code{"2/3"}
-
-@code{((fmt "F.2")  1.0e1000000)} → @code{"+inf.0"}
-
-@code{((fmt "F.2") -1.0e1000000)} → @code{"-inf.0"}
-
-@code{((fmt "F.2") -1.0e-100000)} → @code{"-0.00"}
+@code{((fmt "*F3  ") 2 3.4 5.6)} → @code{"◦2.◦3.◦6."}@(linebreak)
+@code{((fmt "*F5.2") 2 3.4 5.6)} → @code{"◦2.00◦3.40◦5.60"}@(linebreak)
+@code{((fmt "F.4") 2/3)} → @code{"0.6667"}@(linebreak)
+@code{((fmt "D") 2/3)} → @code{"2/3"}@(linebreak)
+@code{((fmt "F")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
+@code{((fmt "F") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
+@code{((fmt "F.2") -1.0e-100000)} → @code{"-0.00"}@(linebreak)
+@code{((fmt "F") (/ 0.0 0.0))} → @code{"+nan.0"}
 
 @subsubsub*section[#:tag "E" "E"@larger{νμε}]
 
@@ -595,7 +575,7 @@ leading blanks, [sign],
 one decimal figure,
 period,
 exactly μ decimal figures,
-letter e, sign of exponent,
+letter @tt{e}, sign of exponent,
 ε or more decimal figures of exponent.
 If the number is not zero, the exponent is chosen such that there is exactly one
 non-zero decimal figure before the decimal point.
@@ -605,18 +585,15 @@ The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
 They are right justified in a field of at least ν characters. Examples:
 
 @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-@code{((fmt "*E10.3.2") 2/3 2.3e-2)} → @code{"◦6.667e-01◦2.300e-02"}
-
-@code{((fmt "E.5") 2/3)} → @code{"6.66667e-1"}
-
-@code{((fmt "E15.5.4") 2/3)} → @code{"◦◦6.66667e-0001"}
-
-@code{((fmt "EXE") #e-1e1000000 -1.0e1000000)} → @code{"-1.e+100000◦-inf.0"}
-
-@code{((fmt "EXE") #e-1e-100000 -1.0e-100000)} → @code{"-1.e-100000◦-0.e+0"}
-
-@code{((fmt "E15 5 3") 0)} → @code{"◦◦◦0.00000e+000"} ; all decimal figures 0.
+In the results proper they are spaces, of course.}}}
+@code{((fmt "*E10.3.2") 2/3 2.3e-2)} → @code{"◦6.667e-01◦2.300e-02"}@(linebreak)
+@code{((fmt "E.5") 2/3)} → @code{"6.66667e-1"}@(linebreak)
+@code{((fmt "E15.5.4") 2/3)} → @code{"◦◦6.66667e-0001"}@(linebreak)
+@code{((fmt "EXE") #e-1e1000000 -1.0e1000000)} → @code{"-1.e+100000◦-inf.0"}@(linebreak)
+@code{((fmt "EXE") #e-1e-100000 -1.0e-100000)} → @code{"-1.e-100000◦-0.e+0"}@(linebreak)
+@code{((fmt "E15 5 3") 0)} → @code{"◦◦◦0.00000e+000"} ; all decimal figures 0.@(linebreak)
+@code{((fmt "e5 5 3") -0.0)} → @code{"-0.00000e+000"}@(linebreak)
+@code{((fmt "E15 5 3") (/ 0.0 0.0))} → @code{"◦◦◦◦◦◦◦◦◦+nan.0"}
 
 The numerical format-instructions
 @literal{B}, @literal{O}, @literal{H} and @literal{=}
@@ -635,7 +612,7 @@ Displays a real number in octal notation.
 
 Displays a real number in hexadecimal notation.
 
-@subsubsub*section[#:tag "=" "="]
+@subsubsub*section[#:tag "=" @larger{@bold{=}}]
 
 Displays a real number in decimal notation.
 
@@ -645,34 +622,24 @@ display the result according to the current padding and sign mode.
 The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
 
 @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "H") 20/31)} → @code{"14/1f"}
-
-@code{((fmt "D") 20/31)} → @code{"20/31"}
-
-@code{((fmt "H") -2.71)} → @code{"-ad70a3d70a3d7/4000000000000"}
-
-@code{((fmt "H") 2.71e-2)} → @code{"6f0068db8bac7/100000000000000"}
-
+@code{((fmt "H") 20/31)} → @code{"14/1f"}@(linebreak)
+@code{((fmt "D") 20/31)} → @code{"20/31"}@(linebreak)
+@code{((fmt "H") -2.71)} → @code{"-ad70a3d70a3d7/4000000000000"}@(linebreak)
+@code{((fmt "H") 2.71e-2)} → @code{"6f0068db8bac7/100000000000000"}@(linebreak)
 @code{((fmt "H") #e2.71e-2)} → @code{"10f/2710"}
 ; 271 in the denominator is a coincidence.
 
-Notice that @code{#x10f} = @code{271} and @code{#x2710} = @code{1000}
+Notice that @code{#x10f} = @code{271} and @code{#x2710} = @code{10000}
 as shown in the following example:
 
-@code{((fmt "=") #e2.71e-2)} → @code{271/10000}
-
-@code{((fmt "R8 H")  2.71e-200000)} → @code{"◦◦◦◦◦◦◦0"}
-
-@code{((fmt "R8 H") -2.71e-200000)} → @code{"◦◦◦◦◦◦-0"}
-
-@code{((fmt "R8 H")  2.71e2000000)} → @code{"◦◦+inf.0"}
-
-@code{((fmt "H") 0)} → @code{"0"}
-
-@code{((fmt "H") -0)} → @code{"0"} ; Because @code{(eqv? 0 -0)} → @code{#t}
-
+@code{((fmt "=") #e2.71e-2)} → @code{271/10000}@(linebreak)
+@code{((fmt "R8 H")  2.71e-200000)} → @code{"◦◦◦◦◦◦◦0"}@(linebreak)
+@code{((fmt "R8 H") -2.71e-200000)} → @code{"◦◦◦◦◦◦-0"}@(linebreak)
+@code{((fmt "R8 H")  2.71e2000000)} → @code{"◦◦+inf.0"}@(linebreak)
+@code{((fmt "H") 0)} → @code{"0"}@(linebreak)
+@code{((fmt "H") -0)} → @code{"0"} ; Because @code{(eqv? 0 -0)} → @code{#t}@(linebreak)
 @code{((fmt "H") -0.0)} → @code{"-0"} ; Because @code{(eqv? 0.0 -0.0)} → @code{#f}
 
 @subsection{Sign mode}
@@ -686,7 +653,7 @@ Instructions @seclink["I" "I"], @seclink["F" "F"] and @seclink["E" "E"]
 may round the number such as to fit the width of the fraction.
 If rounding a negative number yields zero, the minus sign is retained.
 Notice that the @racketlink[exact-integer? "exact integer number"]
-@(minus)0 has no sign. It is the same as @literal["+"]0
+@tt{-0} has no sign. It is the same as @tt["+0"]
 (in the sense of @racket[eq?]).
 When a format-procedure is called from another format-procedure,
 the former inherits the sign mode from the latter.
@@ -694,9 +661,9 @@ If the called procedure alters the sign mode,
 this mode remains effective after return.
 Instruction @seclink["$" "$"] can be used to restore the previous sign mode.
 
-@subsubsub*section[#:tag "+" @larger["+"]]
+@subsubsub*section[#:tag "+" (larger (larger "+"))]
 Switches sign mode on.
-@subsubsub*section[#:tag "-"]{@bold{@larger[(larger (minus))]} (minus sign)}
+@subsubsub*section[#:tag "-"]{̶̶@(hspace 1)(minus sign)}
 Switches sign mode off.
 @subsubsub*section[#:tag "$" "$"@larger{ξ}]
 Memorizes the current sign mode,
@@ -704,7 +671,7 @@ executes instruction ξ and upon completion restores the memorized sign mode.
 
 @subsection{Tabulation}
 Tabulator instructions reposition the write head within or beyond the end of the current line.
-The first character of the current line has index 0.
+The position at the start of the current line has index 0.
 Initially the current line starts at the very beginning of the output to be produced.
 The newline instructions @seclink["/" "/"] and @seclink["|" "|"]
 shift the start of the current line to the start of the new line.
@@ -718,7 +685,7 @@ Placing the write head before the end of the current line does not erase output,
 but allows subsequent output to replace previous output.
 The instructions are effective even if the output device does not allow
 reposition of the write head.
-The tabulator is useful only with fixed width character fonts, such a Courier font.
+@red{Warning}: the tabulator is useful only with fixed width character fonts, such a Courier font.
 
 @subsubsub*section[#:tag "T" "T"@larger{ν}]
 
@@ -746,10 +713,9 @@ executes instruction ξ and upon completion restores the memorized position.
 after restoring, new lines produced by ξ become part of the original current line.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "T10 D T6 D T2 D &R4D") 1 2 3 4)} → @code{"◦◦3◦◦◦2◦◦◦1◦◦◦4"}
-
+@code{((fmt "T10 D T6 D T2 D &R4D") 1 2 3 4)} → @code{"◦◦3◦◦◦2◦◦◦1◦◦◦4"}@(linebreak)
 @code{((fmt "*(T#D)") 1 1 4 4 3 3 5 5 2 2 6 6 7 7 0 0)} → @code{"01234567"}
 
 @subsection[#:tag "condition" "Conditional instructions"]
@@ -776,16 +742,12 @@ An exception is raised if the index is greater than or equal to
 the number of instructions in  @larger["ξ ..."].
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
-
-@code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}
-
-@code{((fmt "!(*(D!X)/)"))} → @code{""}
-
-@code{((fmt "Q'True','False'S") #t)} → @code{"True"}@linebreak[]
-Instruction @code{S} removes @code{#t} from the data.
-
-@code{((fmt "*({'zero' 'one' 'two'}!x)") 2 1 0)} → @code{"two◦one◦zero"}
+In the results proper they are spaces, of course.}}}
+@code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}@(linebreak)
+@code{((fmt "!(*(D!X)/)"))} → @code{""}@(linebreak)
+@code{((fmt "*({'zero' 'one' 'two'}!x)") 2 1 0)} → @code{"two◦one◦zero"}@(linebreak)
+@code{((fmt "Q'True','False'S") #t)} → @code{"True"}
+; Instruction @code{S} removes @code{#t} from the data.
 
 @subsection[#:tag "iteration"]{Iterations}
 
@@ -798,12 +760,10 @@ Repeated execution of ξ until no data remain.
 Instruction ξ is executed ν times.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "R3 4D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}
-
-@code{((fmt "R3 *D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}
-
+@code{((fmt "R3 4D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
+@code{((fmt "R3 *D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
 @code{((fmt "R# #D") 3 4 1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}
 
 @subsubsub*section[#:tag "_νμξξ" "_"@larger{νμξξ} " (underline)"]
@@ -816,7 +776,7 @@ Examples:
 @scheme[((fmt "_8.3'a' 'b'"))] → @code{"aaabaaabaa"}
 
 @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 @scheme[((fmt 'current "U_#3(DX)/|'fin'") (list 1 2 3 4 5 6 7 8))] → void, displays:@linebreak[]
 @code{1◦2◦3◦}@linebreak[]
 @code{4◦5◦6◦}@linebreak[]
@@ -859,19 +819,17 @@ after completion of the compound instruction is added to
 the remaining data and becomes the first next datum.
 Each special compound instruction has its own offset for the tabulator.
 The square brackets are part of the instruction.
-They do not indicate that ξ... is optional.
-In fact the ellipsis makes ξ... optional.
+They do not indicate that ξ ... is optional.
+In fact the ellipsis makes ξ ... optional.
 [] produces an empty string.
-@red{Warning}: new lines produced by ξ... become part of the original current line.
+@red{Warning}: new lines produced by ξ ... become part of the original current line.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}
-
-@code{((fmt "L3 [*D] C20 D") 1 2 3 4)} → @code{"◦◦◦◦◦1◦◦2◦◦3◦◦4◦◦◦◦◦"}
-
-@code{((fmt "['123'/'456'] T1 D T0 '0'"))} → @code{"0123\n456"}
+@code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}@(linebreak)
+@code{((fmt "L3 [*D] C20 D") 1 2 3 4)} → @code{"◦◦◦◦◦1◦◦2◦◦3◦◦4◦◦◦◦◦"}@(linebreak)
+@code{((fmt "['123'/'456'] D T3 '|'"))} → @code{"123|456"}
 
 @subsection{Miscellaneous instructions}
 
@@ -901,7 +859,8 @@ Positions the write head at the end of the current line and
 writes all remaining data separated by spaces and terminated by a newline.
 Same as @code{"!(&n*(w!x)/)"}.
 Usually it is wise to write @code{"&x~"} or @code{"&|~"}
-in order to separate the remaining output from output already produced.
+in order to separate the remaining output from output already produced
+and to avoid writing over already generated output.
 
 @subsubsub*section[#:tag "J" "J"]
 
@@ -912,10 +871,9 @@ No operation.
 Consumes a datum which must be a natural number(exact-nonnegative-integer) or @code{#f}.
 It is supposed to be a time measured in seconds from the platform specific starting time.
 @code{#f} is for the current time.
-The time is displayed as: @literal["DDD,◦dd◦MMM◦yyyy◦hh:mm:ss◦±hhmm"]  
-(`◦´ used to show spaces. In the real results they are spaces, of course.)
-A limit may be imposed on the number of seconds.
-On many platforms the datum is restricted to a fixnum or even less.
+The time is displayed as: @literal["DDD,◦dd◦MMM◦yyyy◦hh:mm:ss◦±hhmm"],
+exactly 31 characters.
+Instruction G limits the argument to less than 2@superscript{32}.
 
 @tabular[
  #:sep @hspace[1]
@@ -927,7 +885,7 @@ On many platforms the datum is restricted to a fixnum or even less.
   (list @code["MMM"]
         "First three letters of the name of the month.")
   (list @code["yyyy"]
-        "Four (or more) decimal figures for the year.")
+        "Four decimal figures of the year")
   (list @code["hh"]
         "Two decimal figures for the hour of the day on 24 hour basis.")
   (list @code["mm"]
@@ -939,15 +897,20 @@ On many platforms the datum is restricted to a fixnum or even less.
 
 Examples (assuming Windows XP or Windows 7 in time zone +0100)
 
-@code{((fmt "G") 0)} → @code{"Thu,◦01◦Jan◦1970◦01:00:00◦+0100"}
+@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "^'0' G"))}  Same as: @code{((fmt "G") 0)}
-
-@code{((fmt "G") (sub1 (expt 2 31)))} → @code{"Tue,◦19◦Jan◦2038◦04:14:07◦+0100"}
-
-@code{((fmt "G") #f)}  Same as: @code{((fmt "G") (current-seconds))}
-
+@code{((fmt "G") 0)} → @code{"Thu,◦01◦Jan◦1970◦01:00:00◦+0100"}@(linebreak)
+@code{((fmt "^'0' G"))}  Same as: @code{((fmt "G") 0)}@(linebreak)
+@code{((fmt "G") (sub1 (expt 2 31)))} → @code{"Tue,◦19◦Jan◦2038◦04:14:07◦+0100"}@(linebreak)
+@code{((fmt "G") #f)}  Same as: @code{((fmt "G") (current-seconds))}@(linebreak)
 @code{((fmt "^'#f' G"))}  Same as: @code{((fmt "G") #f)}
+
+The following produces an exception:
+
+@interaction[
+(require "fmt.rkt")
+((fmt "G") (expt 2 32))]
 
 @subsection[#:tag "unfolding"]{Unfolding}
 
@@ -970,18 +933,12 @@ An element that causes a cycle is not unfolded.
 
 Consumes a datum and unfolds it. Examples: 
 
-@scheme[((fmt "U~") '())] → @code{"0\n"}
-
-@scheme[((fmt "U~") '(a b c))] → @code{"3 a b c\n"}
-
-@scheme[((fmt "U~") '(() () ()))] → @code{"3 () () ()\n"}
-
-@scheme[((fmt "U~") '(a b . c))] → @code{"3 a b c\n"}
-
-@scheme[((fmt "U~") '((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}
-
-@scheme[((fmt "U~") #(a b c))] → @code{"3 a b c\n"}
-
+@scheme[((fmt "U~") '())] → @code{"0\n"}@(linebreak)
+@scheme[((fmt "U~") '(a b c))] → @code{"3 a b c\n"}@(linebreak)
+@scheme[((fmt "U~") '(() () ()))] → @code{"3 () () ()\n"}@(linebreak)
+@scheme[((fmt "U~") '(a b . c))] → @code{"3 a b c\n"}@(linebreak)
+@scheme[((fmt "U~") '((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}@(linebreak)
+@scheme[((fmt "U~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
 @scheme[((fmt "U~") #((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}
 
 @interaction/no-prompt[
@@ -1008,24 +965,19 @@ Consumes a datum and unfolds it. Examples:
 
 Consumes and recursively unfolds the next datum in depth first order. Examples:
 
-@scheme[((fmt "V~") '())] → @code{"0\n"}
-
-@scheme[((fmt "V~") '(a b c))] → @code{"3 a b c\n"}
-
-@scheme[((fmt "V~") '(() () ()))] → @code{"0\n"}
-
-@scheme[((fmt "V~") '(a b . c))] → @code{"3 a b c\n"}
-
-@scheme[((fmt "V~") '((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}
-
-@scheme[((fmt "V~") #(a b c))] → @code{"3 a b c\n"}
-
+@scheme[((fmt "V~") '())] → @code{"0\n"}@(linebreak)
+@scheme[((fmt "V~") '(a b c))] → @code{"3 a b c\n"}@(linebreak)
+@scheme[((fmt "V~") '(() () ()))] → @code{"0\n"}@(linebreak)
+@scheme[((fmt "V~") '(a b . c))] → @code{"3 a b c\n"}@(linebreak)
+@scheme[((fmt "V~") '((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}@(linebreak)
+@scheme[((fmt "V~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
 @scheme[((fmt "V~") #((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}
 
-@racketblock[
+@interaction[
+ (require "fmt.rkt")
  (define v (vector 'a 'b 'c))
  (vector-set! v 1 v)
- ((fmt "V~") v)] → @code{"3 a #0=#(a #0# c) c)\n"}
+ ((fmt "V~") v)]
 because the second element (index 1) causes a cycle.
 
 @subsubsub*section[#:tag "Z" "Z"]
@@ -1052,22 +1004,18 @@ Zero, @code{+0.0} and @code{-0.0} included, are treated as @code{0}.
 
 @subsubsub*section[#:tag "\\" "\\\\"]
 
-A single back-slash, but within a string an escaping backs-slash is required.
+A single back-slash, but within a string an escaping back-slash is required.
 Consumes a datum, which must be a number.
 The number is consumed and its @code{magnitude} and @code{angle} are added to the remaining data.
 The magnitude and angle of exact zero are zero.
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the real results they are spaces, of course.}}}
+In the results proper they are spaces, of course.}}}
 
-@code{((fmt "U#(DX)") '(a b c d))} → @code{"a◦b◦c◦d◦"}
-
-@code{((fmt "U*(DX)") '(a b c d))} → @code{"4◦a◦b◦c◦d◦"}
-
-@code{((fmt "YF.3+F.2'i'") -12.34+56.78i)} → @code{"-12.340+56.78i"}
-
-@code{((fmt "%d'/'d") -0.0)} → @code{0/1}
-
+@code{((fmt "U#(DX)") '(a b c d))} → @code{"a◦b◦c◦d◦"}@(linebreak)
+@code{((fmt "U*(DX)") '(a b c d))} → @code{"4◦a◦b◦c◦d◦"}@(linebreak)
+@code{((fmt "YF.3+F.2'i'") -12.34+56.78i)} → @code{"-12.340+56.78i"}@(linebreak)
+@code{((fmt "%d'/'d") -0.0)} → @code{0/1}@(linebreak)
 @code{((fmt "\\f.4xf.4") 3+4i)} → @code{"5.0000 0.9273"}
 
 @code{((fmt 'current "*(%R20DN'/'L20D/)") 110/333 -1/3 0.75 -0.75 (/ 1.0 3))}
@@ -1156,10 +1104,10 @@ The purpose of the procedure is to display a detailed bill.
     ((fmt-proc
       (fmt "/" line headers line data line grand-total line 'current)))
     (lambda (table)
-            (let*
-             ((totals (map (λ (x) (* (cadr x) (caddr x))) table))
-              (grand-total (apply + totals)))
-             (fmt-proc (map list table totals) grand-total))))))
+     (let*
+      ((totals (map (λ (x) (* (cadr x) (caddr x))) table))
+       (grand-total (apply + totals)))
+      (fmt-proc (map list table totals) grand-total))))))
  
  (print-bill '((chair 4 50) (table 1 100) (pillow 4 10)))]
 
@@ -1189,17 +1137,17 @@ with its base at the bottom and all other lines centred above the bottom line.
    (define (make-next-row order prev-row)
     (list->vector
      (cons 1
-           (let loop ((j 1))
-                (if (> j order) '(1)
-                    (cons
-                     (+ (vector-ref prev-row (sub1 j)) (vector-ref prev-row j))
-                     (loop (add1 j))))))))
+      (let loop ((j 1))
+       (if (> j order) '(1)
+        (cons
+          (+ (vector-ref prev-row (sub1 j)) (vector-ref prev-row j))
+          (loop (add1 j))))))))
    (lambda (n)
     (fmt-table
      (let loop ((order 0) (row #1(1)))
-          (cons (fmt-row order row)
-                (if (>= order n)  '( )
-                    (loop (add1 order) (make-next-row order row)))))))))
+      (cons (fmt-row order row)
+       (if (>= order n)  '( )
+        (loop (add1 order) (make-next-row order row)))))))))
  
  (binomials 9)]
 
@@ -1260,8 +1208,8 @@ with its base at the bottom and all other lines centred above the bottom line.
   (list @secref[#:underline? #f]{~} "Display all remaining data")
   (list @secref[#:underline? #f]{*ξ} "Repeat until no more data")
   (list @secref[#:underline? #f]{νξ} "Repeat ν times")
-  (list @secref[#:underline? #f]{!} "If more data left")
-  (list @secref[#:underline? #f]{?} "If no more data left")
+  (list @secref[#:underline? #f]{!} "When more data left")
+  (list @secref[#:underline? #f]{?} "Unless more data left")
   (list @secref[#:underline? #f]{+} "Sign mode on")
   (list @secref[#:underline? #f]{-} "Sign mode off")
   (list @secref[#:underline? #f]{$} "Preserve sign mode")
