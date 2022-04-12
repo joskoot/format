@@ -1,9 +1,9 @@
 #lang scribble/manual
 @(require scribble/eval scribble/core (for-label "fmt.rkt" racket) racket)
-(define (/cdot/) "·")
+
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
 
 @(define (inset . x) (apply nested #:style 'inset x))
 @(define (note . x) (inset (apply smaller x)))
