@@ -3,7 +3,7 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
 
 @(define-syntax (deffmt stx)
   (syntax-case stx ()
@@ -669,7 +669,7 @@ The sign mode is relevant for the numerical instructions @seclink["I" "I"],
 When sign mode is off, positive numbers get no sign.
 When sign mode is on, positive numbers, exact zero and @code{+0.0} get a plus sign.
 Negative numbers always get a minus sign, @code{-0.0} included.
-Instructions @seclink["I" "I"], @seclink["F" "F"] and @seclink["E" "E"]
+Instructions @elemref["I" "I"], @elemref["F" "F"] and @elemref["E" "E"]
 may round the number such as to fit the width of the fraction.
 If rounding a negative number yields zero, the minus sign is retained.
 Notice that the @racketlink[exact-integer? "exact integer number"]
@@ -679,7 +679,7 @@ When a format-procedure is called from another format-procedure,
 the former inherits the sign mode from the latter.
 If the called procedure alters the sign mode,
 this mode remains effective after return.
-Instruction @seclink["$" "$"] can be used to restore the previous sign mode.
+Instruction @elemref["$" "$"] can be used to restore the previous sign mode.
 
 @deffmt["+"]{
 Switches sign mode on.}
@@ -694,7 +694,7 @@ executes instruction ξ and upon completion restores the memorized sign mode.}
 Tabulator instructions reposition the write head within or beyond the end of the current line.
 The position at the start of the current line has index 0.
 Initially the current line starts at the very beginning of the output to be produced.
-The newline instructions @seclink["/" "/"] and @seclink["|" "|"]
+The newline instructions @elemref["/" "/"] and @elemref["|" "|"]
 shift the start of the current line to the start of the new line.
 New lines made in any other way (for example when part of a literal datum)
 do not reposition the start of the current line.
@@ -861,7 +861,7 @@ executes the instruction and restores the memorized state.
 @deffmt[#:tag ":" ":"]{
 
 Exits from @seclink["compound" "a compound instruction"]
-or from a format-procedure or format-string called with instruction @seclink["K" "K"].
+or from a format-procedure or format-string called with instruction @elemref["K" "K"].
 At top level same as instruction @bold{;}.}
 
 @deffmt[#:tag ";" ";"]{
@@ -935,7 +935,7 @@ The following produces an exception:
 Unfolding means that the elements of a vector or immutable list will be treated as separate data.
 These data are preceded by the number of elements.
 This exact non-negative integer number can be used as a repetition-count with instruction
-@seclink[#:underline? #f "νξ" "#ξ"].
+@elemref["νξ" "νξ"].
 A structure (that satisfies predicate @scheme[struct?]) is first converted to a vector and
 the latter is unfolded.
 A box is unfolded by taking it's contents and adding 1 as the first next datum.
