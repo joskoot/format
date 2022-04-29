@@ -3,7 +3,7 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
 
 @(define-syntax (deffmt stx)
   (syntax-case stx ()
@@ -754,7 +754,7 @@ Executes instruction ξ only if there are no more data.}
 Requires one datum, but does not consume it.
 If the datum is true, the first instruction is executed, else the second one.}
 
-@deffmt[#:tag "sel" "{ξ ...+"]{
+@deffmt[#:tag "sel" "{ξ ...+}"]{
 
 Requires and consumes a natural number.
 This number is used as index to select one instruction of @larger["ξ ..."],
@@ -1235,6 +1235,6 @@ with its base at the bottom and all other lines centred above the bottom line.
   (list @elemref[">"]{>} "Relative tab forward")
   (list @elemref["_νμξξ"]{_νμξξ} "Iteration")
   (list @elemref["λ"]{λ} "Call procedure")
-  (list @elemref["sel"]{(ξ...)} "Instruction selector"))]
+  (list @elemref["sel"]{@tt["{ξ...}"]} "Instruction selector"))]
 
 @larger{@larger{@@bold{The end}}}
