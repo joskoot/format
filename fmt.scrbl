@@ -3,7 +3,26 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
+
+@(define-syntax (deffmt stx)
+  (syntax-case stx ()
+   ((_ #:tag tag x y ...)
+  #'(begin
+     (elemtag tag)
+     (defthing #:kind "fmt instruction" #:link-target? #f x #,(hspace 0) y ...)))
+   ((_ x y ...)
+  #'(begin
+     (elemtag x)
+     (defthing #:kind "fmt instruction" #:link-target? #f x #,(hspace 0) y ...)))))
+
+@(define-syntax-rule (Interaction x ...)
+  (interaction #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
+   (print-as-expression #f))) x ...))
+
+@(define-syntax-rule (Interaction/no-prompt x ...)
+  (interaction/no-prompt #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
+   (print-as-expression #f))) x ...))
 
 @(define (inset . x) (apply nested #:style 'inset x))
 @(define (note . x) (inset (apply smaller x)))
@@ -153,7 +172,7 @@ the produced format-procedure requires the data to be preceded by a @racket[port
    the formatted data are returned as a string.})]}
 
 Examples:
-@margin-note{@element["sroman"]{@smaller{In these examples instruction @seclink["I" "I5"]
+@margin-note{@element["sroman"]{@smaller{In these examples instruction @elemref["I" "I5"]
  is given exact integer numbers
  and displays them right justified in fields of 5 characters.@(linebreak)
  In the results `◦´ is used to show spaces.@(linebreak)
@@ -170,9 +189,7 @@ Forgetting the @italic{@racket[port-arg]}ument when calling a format-procedure m
 @italic{@racket[port]}-argument @racket['argument] or @racket['arg] raises an exception
 or may produce unexpected results:
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (define my-fmt (fmt "I5" 'argument))
+@Interaction/no-prompt[ (define my-fmt (fmt "I5" 'argument))
  (my-fmt 12)
  ((fmt 'arg "D") (open-output-string))]
 
@@ -287,7 +304,7 @@ a data consuming instruction after all data already have been consumed or
 when unconsumed data remain after completion of the format-procedure.
 There are instructions that add data to the list of remaining data, possibly after consuming data.
 The added data always are the first to be consumed next.
-For example, instruction @seclink["%" "%"] consumes a datum, which must be a rational number,
+For example, instruction @elemref["%" "%"] consumes a datum, which must be a rational number,
 and adds the numerator and denominator
 as two separate exact integer numbers in front of the remaining data,
 the numerator becoming the first datum, the denominator the second one.
@@ -296,22 +313,22 @@ Example:
 
 @code{((fmt "%I':'I") 30/-40)} → @code{"-3:4"}
 
-In this example instruction @seclink{%} consumes the datum @racket[30/-40] and adds
+In this example instruction @elemref["%"]{%} consumes the datum @racket[30/-40] and adds
 the numerator @racket[-3] and denominator @racket[4] to the list of remaining data,
 which in this example is empty.@(linebreak)
-The first @nonbreaking{@seclink["I"]{I-instruction}} displays the numerator.
-The @seclink["simple-literal"]{literal} @code{"':'"} displays the colon.@(linebreak)
-The second @nonbreaking{@seclink["I"]{I-instruction}} displays the denominator.
+The first @nonbreaking{@elemref["I"]{I-instruction}} displays the numerator.
+The @elemref["simple-literal"]{literal} @code{"':'"} displays the colon.@(linebreak)
+The second @nonbreaking{@elemref["I"]{I-instruction}} displays the denominator.
 The output is collected in a string. @nonbreaking{This string is returned.}
 
 When you do want the format procedure to return normally when given more data than consumed,
-add @tt{"}@seclink["*ξ" "*"]@seclink["S" "S"]@tt{"} as the last format-instruction.
+add @tt{"}@elemref["*ξ" "*"]@elemref["S" "S"]@tt{"} as the last format-instruction.
 The unconsumed data will be ignored. Example:
 
 @racket[((fmt "d*s") 1 2 3 4)] → @racket["1"]. 
 
 When you do want the format-procedure to return normally when given less data than expected,
-insert instruction @tt{"}@seclink["?" "?"]@seclink[";" ";"]@tt{"} where appropriate.
+insert instruction @tt{"}@elemref["?" "?"]@elemref[";" ";"]@tt{"} where appropriate.
 For example:
 
 @racket[((fmt "5(?;d!x)") 1 2 3)] → @racket["1 2 3"]
@@ -366,7 +383,7 @@ In the results proper they are spaces, of course.}}}
  @hyperlink["http://docs.racket-lang.org/reference/printing.html"]{The Printer}
  for the distinction between @racket[display], @racket[write] and @racket[print].}}}
 
-@subsubsub*section[#:tag "D" "D"]
+@deffmt["D"]{
 
 Consumes one datum and @racket[display]s it according to the current
 @seclink["Padding" "padding"] mode.
@@ -375,30 +392,30 @@ heading and trailing spaces are removed before the string is padded.
 No spaces are removed from or added to strings that are non trivial parts of the datum,
 for example in case the datum is a list of strings.
 In such a case you may want to unfold the list.
-This allows each element to be formatted individually. See section @secref["unfolding"].
+This allows each element to be formatted individually. See section @secref["unfolding"].}
 
-@subsubsub*section[#:tag "W" "W"]
+@deffmt["W"]{
 
 Consumes one datum and @racket[write]s it according to the current
-@seclink["Padding" "padding"] mode.
+@seclink["Padding" "padding"] mode.}
 
-@subsubsub*section[#:tag "P" "P"]
+@deffmt["P"]{
 
 Consumes one datum and @racket[print]s it according to the current
-@seclink["Padding" "padding"] mode.
+@seclink["Padding" "padding"] mode.}
 
-@subsubsub*section[#:tag "X" "X"]
+@deffmt["X"]{
 
-Displays one space.
+Displays one space.}
 
-@subsubsub*section[#:tag "/" "/"]
+@deffmt["/"]{
 
-Executes a newline instruction and marks the start of the new line.
+Executes a newline instruction and marks the start of the new line.}
 See @seclink["Tabulation" "tabulation"].
 
-@subsubsub*section[#:tag "|" "|"]
+@deffmt["|"]{
 
-Executes a newline instruction only if not at the start of the current line.
+Executes a newline instruction only if not at the start of the current line.}
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -411,17 +428,17 @@ In the results proper they are spaces, of course.}}}
 
 Padding applies to @seclink["literal" "literal data"] and
 the instructions
-@seclink["D" "D"],
-@seclink["W" "W"],
-@seclink["P" "P"],
-@seclink["B" "B"],
-@seclink["O" "O"],
-@seclink["H" "H"] and
-@seclink["=" @bold{@bold{@larger["="]}}].
+@elemref["D" "D"],
+@elemref["W" "W"],
+@elemref["P" "P"],
+@elemref["B" "B"],
+@elemref["O" "O"],
+@elemref["H" "H"] and
+@elemref["=" @bold{@bold{@larger["="]}}].
 When padding is switched on,
 these instructions add heading and/or trailing spaces
 if otherwise less characters would be generated than indicated by the field width.
-Instruction @seclink["D" "D"] first removes heading and trailing spaces when padding a string.
+Instruction @elemref["D" "D"] first removes heading and trailing spaces when padding a string.
 The same holds when padding a literal datum.
 Output that does not fit within the field width is not truncated.
 Initially padding is switched off.
@@ -429,32 +446,32 @@ When a format-procedure is called from another format-procedure,
 the former inherits the padding mode from the latter.
 If the called procedure alters the padding mode,
 the alteration remains effective after return.
-Instruction @seclink["A" "A"] can be used to restore the previous padding mode.
+Instruction @elemref["A" "A"] can be used to restore the previous padding mode.
 @red{Warning}: because padding is done by insertion of spaces,
 it is useful only with a font of fixed character width.
 
-@subsubsub*section[#:tag "N" "N"]
+@deffmt["N"]{
 
-Switches padding off. No spaces are removed or added.
+Switches padding off. No spaces are removed or added.}
 
-@subsubsub*section[#:tag "L" "L"@larger{ν}]
+@deffmt[#:tag "L" "Lν"]{
 
-For left alignment in fields of ν characters.
+For left alignment in fields of ν characters.}
 
-@subsubsub*section[#:tag "R" "R"@larger{ν}]
+@deffmt[#:tag "R" "Rν"]{
 
-For right alignment in fields of ν characters.
+For right alignment in fields of ν characters.}
 
-@subsubsub*section[#:tag "C" "C"@larger{ν}]
+@deffmt[#:tag "C" "Cν"]{
 
 For centred alignment in fields of ν characters.
 When needed, spaces are added to the left and to the right in order to match the field width.
 If the number of spaces to be added is even, say @italic{2k},
 then @italic{k} spaces are added both at the left and at the right.
 If the number of spaces to be added is odd, say @italic{2k+1},
-then @italic{k+1} spaces are added to the left and @italic{k} spaces to the right.
+then @italic{k+1} spaces are added to the left and @italic{k} spaces to the right.}
 
-@subsubsub*section[#:tag "A" "A"@larger{ξ}]
+@deffmt[#:tag "A" "Aξ"]{
 
 Memorizes the current padding mode and field width,
 executes instruction ξ and upon completion restores the memorized padding mode and field width.
@@ -467,10 +484,10 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "N  D") "◦◦Jacob◦◦")} → @code{"◦◦Jacob◦◦"} ; no spaces removed, nor added.@(linebreak)
 @code{((fmt "L0 D") "◦◦Jacob◦◦")} → @code{"Jacob"} ; spaces removed, no spaces added.@(linebreak)
 @code{((fmt "L8 D") "◦◦Jacob◦◦")} → @code{"Jacob◦◦◦"} ; spaces first removed, then added.
-
+}
 @subsection[#:tag "literal" "Literal data"]
 
-@subsubsub*section[#:tag "simple-literal" @larger[@literal["'κ ...'"]]]
+@deffmt[#:tag "simple-literal" "'κ ...'"]{
 
 Each κ is an arbitrary character,
 except that a single quote must be written as two immediately adjacent single quotes.
@@ -479,11 +496,10 @@ id est, as @literal{\\} or @literal{\"}.
 The string @literal{"κ ..."} is displayed according to the current padding mode.
 In literals the backslash can also be used for other escapes, for example:
 
-@interaction[
-(require "fmt.rkt")
-((fmt "'a\nb'" 'cur))]
+@Interaction[
+((fmt "'a\nb'" 'cur))]}
 
-@subsubsub*section[#:tag "compound-literal" @larger[@literal["^'κ ...'"]]]
+@deffmt[#:tag "compound-literal" "^'κ ...'"]{ 
 
 @literal["'κ ...'"] has the same form as above.
 The string must contain zero or more symbolic expressions.
@@ -492,12 +508,12 @@ They are read at parsing time and added to the list of remaining data during
 execution of the format-procedure.
 The leftmost symbolic expression becomes the first next datum.
 In the symbolic expressions each single quote must be written as
-two immediately adjacent single quotes.
+two immediately adjacent single quotes.}
 
 Because within a literal,
 two adjacent single quotes are read as one single quote being part of the literal,
 a separator is required between two adjacent literals when the second one is of the
-@seclink["simple-literal" "first form"].
+@elemref["simple-literal" "first form"].
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -512,16 +528,15 @@ In the results proper they are spaces, of course.}}}
 @literal{'κ ...'} must not be split over two or more format-strings.
 For example, the following raises an exception:
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (fmt "'Article" "Price'")]
+@Interaction/no-prompt[
+(fmt "'Article" "Price'")]
 
 @subsection[#:tag "numerical"]{Numerical formats}
 
 The numerical format-instructions @code{I}, @code{F} and @code{E} have their own padding,
 independent from the padding mode described @seclink["Padding" "elsewhere"] in this document.
 
-@subsubsub*section[#:tag "I" "I"@larger{νμ}]
+@deffmt[#:tag "I" "Iνμ"]{
 
 Instruction @code{I} is particularly useful for integer numbers,
 but nevertheless accepts every real number.
@@ -548,9 +563,9 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "I")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
 @code{((fmt "I") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
 @code{((fmt "I10") (/ 0.0 0.0))} → @code{"◦◦◦◦+nan.0"}@(linebreak)
-@code{(string-length ((fmt "I") #e1e100000))} → @code{100001}
+@code{(string-length ((fmt "I") #e1e100000))} → @code{100001}}
 
-@subsubsub*section[#:tag "F" "F"@larger{νμ}]
+@deffmt[#:tag "F" "Fνμ"]{
 
 Consumes and displays a real number in decimal expansion:
 leading spaces, [sign], integer part, period, fraction of exactly μ decimal figures.
@@ -571,9 +586,9 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "F")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
 @code{((fmt "F") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
 @code{((fmt "F.2") -1.0e-100000)} → @code{"-0.00"}@(linebreak)
-@code{((fmt "F") (/ 0.0 0.0))} → @code{"+nan.0"}
+@code{((fmt "F") (/ 0.0 0.0))} → @code{"+nan.0"}}
 
-@subsubsub*section[#:tag "E" "E"@larger{νμε}]
+@deffmt[#:tag "E" "Eνμε"]{
 
 Consumes and displays a real number in scientific notation:
 leading blanks, [sign],
@@ -598,28 +613,28 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "EXE") #e-1e-100000 -1.0e-100000)} → @code{"-1.e-100000◦-0.e+0"}@(linebreak)
 @code{((fmt "E15 5 3") 0)} → @code{"◦◦◦0.00000e+000"} ; all decimal figures 0.@(linebreak)
 @code{((fmt "e5 5 3") -0.0)} → @code{"-0.00000e+000"}@(linebreak)
-@code{((fmt "E15 5 3") (/ 0.0 0.0))} → @code{"◦◦◦◦◦◦◦◦◦+nan.0"}
+@code{((fmt "E15 5 3") (/ 0.0 0.0))} → @code{"◦◦◦◦◦◦◦◦◦+nan.0"}}
 
 The numerical format-instructions
 @literal{B}, @literal{O}, @literal{H} and @literal{=}
 are padded according to the current
 @seclink["Padding" "padding"] mode described elsewhere in this document.
 
-@subsubsub*section[#:tag "B" "B"]
+@deffmt[#:tag "B" "B"]{
 
-Displays a real number in binary notation.
+Displays a real number in binary notation.}
 
-@subsubsub*section[#:tag "O" "O"]
+@deffmt[#:tag "O" "O"]{
 
-Displays a real number in octal notation.
+Displays a real number in octal notation.}
 
-@subsubsub*section[#:tag "H" "H"]
+@deffmt[#:tag "H" "H"]{
 
-Displays a real number in hexadecimal notation.
+Displays a real number in hexadecimal notation.}
 
-@subsubsub*section[#:tag "=" @larger{@bold{=}}]
+@deffmt[#:tag "=" "=}"]{
 
-Displays a real number in decimal notation.
+Displays a real number in decimal notation.}
 
 @literal{B}, @literal{O}, @literal{H} and = convert the number to an exact one and
 use @racket[number->string] to convert the absolute value and
@@ -666,13 +681,14 @@ If the called procedure alters the sign mode,
 this mode remains effective after return.
 Instruction @seclink["$" "$"] can be used to restore the previous sign mode.
 
-@subsubsub*section[#:tag "+" (larger (larger "+"))]
-Switches sign mode on.
-@subsubsub*section[#:tag "-"]{̶̶@(hspace 1)(minus sign)}
-Switches sign mode off.
-@subsubsub*section[#:tag "$" "$"@larger{ξ}]
+@deffmt["+"]{
+Switches sign mode on.}
+@deffmt[#:tag "-"]{
+Switches sign mode off.}
+
+@deffmt[#:tag "$" "$ξ"]{
 Memorizes the current sign mode,
-executes instruction ξ and upon completion restores the memorized sign mode.
+executes instruction ξ and upon completion restores the memorized sign mode.}
 
 @subsection{Tabulation}
 Tabulator instructions reposition the write head within or beyond the end of the current line.
@@ -692,30 +708,30 @@ The instructions are effective even if the output device does not allow
 reposition of the write head.
 @red{Warning}: the tabulator is useful only with fixed width character fonts, such a Courier font.
 
-@subsubsub*section[#:tag "T" "T"@larger{ν}]
+@deffmt[#:tag "T" "Tν"]{
 
-Places the write head at position ν of the current line.
+Places the write head at position ν of the current line.}
 
-@subsubsub*section[#:tag ">" ">"@larger{ν}]
+@deffmt[#:tag ">" ">ν"]{
 
-Positions the write head forward relative to the current position.
+Positions the write head forward relative to the current position.}
 
-@subsubsub*section[#:tag "<" "<"@larger{ν}]
+@deffmt[#:tag "<" "<ν"]{
 
 Positions the write head backwards relative to the current position.
 An exception is raised when an attempt is made
-to position the write head before the start of the current line.
+to position the write head before the start of the current line.}
 
-@subsubsub*section[#:tag "&" "&"]
+@deffmt[#:tag "&" "&"]{
 
-Positions the write head at the end of current line.
+Positions the write head at the end of current line.}
 
-@subsubsub*section[#:tag "@" "@"@larger{ξ}]
+@deffmt[#:tag "@" "@ξ"]{
 
 Memorizes the position of the start of the current line,
 executes instruction ξ and upon completion restores the memorized position.
 @red{Warning}:
-after restoring, new lines produced by ξ become part of the original current line.
+after restoring, new lines produced by ξ become part of the original current line.}
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -725,26 +741,26 @@ In the results proper they are spaces, of course.}}}
 
 @subsection[#:tag "condition" "Conditional instructions"]
 
-@subsubsub*section[#:tag "!" "!"@larger{ξ}]
+@deffmt[#:tag "!" "!ξ"]{
 
-Executes instruction ξ only if there are more data.
+Executes instruction ξ only if there are more data.}
 
-@subsubsub*section[#:tag "?" "?"@larger{ξ}]
+@deffmt[#:tag "?" "?ξ"]{
 
-Executes instruction ξ only if there are no more data.
+Executes instruction ξ only if there are no more data.}
 
-@subsubsub*section[#:tag "Q" "Q"@larger{ξξ}]
+@deffmt[#:tag "Q" "Qξξ"]{
 
 Requires one datum, but does not consume it.
-If the datum is true, the first instruction is executed, else the second one.
+If the datum is true, the first instruction is executed, else the second one.}
 
-@subsubsub*section[#:tag "sel" @larger["{ξ ..."]@superscript{+}@larger["}"]]
+@deffmt[#:tag "sel" "{ξ ...+"]{
 
 Requires and consumes a natural number.
 This number is used as index to select one instruction of @larger["ξ ..."],
 counting from 0. The other instructions are ignored.
 An exception is raised if the index is greater than or equal to
-the number of instructions in  @larger["ξ ..."].
+the number of instructions in  @larger["ξ ..."].}
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -756,13 +772,13 @@ In the results proper they are spaces, of course.}}}
 
 @subsection[#:tag "iteration"]{Iterations}
 
-@subsubsub*section[#:tag "*ξ" @larger{*ξ}]
+@deffmt["*ξ"]{
 
-Repeated execution of ξ until no data remain.
+Repeated execution of ξ until no data remain.}
 
-@subsubsub*section[#:tag "νξ" @larger{νξ}]
+@deffmt[#:tag "νξ"]{
 
-Instruction ξ is executed ν times.
+Instruction ξ is executed ν times.}
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -771,9 +787,9 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "R3 *D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
 @code{((fmt "R# #D") 3 4 1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}
 
-@subsubsub*section[#:tag "_νμξξ" "_"@larger{νμξξ} " (underline)"]
+@deffmt[#:tag "_νμξξ" ]{
 
-Executes the first instruction ν times but after every μ times the second instruction is inserted.
+Executes the first instruction ν times but after every μ times the second instruction is inserted.}
 Examples:
 
 @scheme[((fmt "_9.3'a' 'b'"))] → @code{"aaabaaabaaab"}
@@ -794,29 +810,27 @@ In the results proper they are spaces, of course.}}}
 @code{7◦8◦9◦}@linebreak[]
 @code{fin}
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (define v (for/list ((k (in-range 24))) (random)))
- ((fmt 'current "u_#4f8.3/|d") v "output to follow")]
+@Interaction/no-prompt[
+(define v (for/list ((k (in-range 24))) (random)))
+((fmt 'current "u_#4f8.3/|d") v "output to follow")]
 
 Mark the vertical bar following the slash.
 In the previous example it does not include an extra line-break before the output to
 follow. In the following example it does insert a line-break.
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (define v (for/list ((k (in-range 25))) (random)))
- ((fmt 'current "u_#4f8.3/|d") v "output to follow")]
+@Interaction/no-prompt[
+(define v (for/list ((k (in-range 25))) (random)))
+((fmt 'current "u_#4f8.3/|d") v "output to follow")]
 
 @subsection[#:tag "compound"]{Compound instructions}
 
-@subsubsub*section[#:tag "simple-compound" "("@larger{ξ}" ...)"]
+@deffmt[#:tag "simple-compound" "(ξ ...+)"]{
 
 Compound instruction. Useful for @seclink["condition" "conditions"],
 @seclink["iteration" "iterations"] and as argument of an instruction with one or more other
-instructions as arguments.
+instructions as arguments.}
 
-@subsubsub*section[#:tag "special-compound" "["@larger{ξ}" ...]"]
+@deffmt[#:tag "special-compound" "[ξ ...+]"]{
 
 Special compound instruction.
 The output of the instructions is gathered in a string which
@@ -827,7 +841,7 @@ The square brackets are part of the instruction.
 They do not indicate that ξ ... is optional.
 In fact the ellipsis makes ξ ... optional.
 [] produces an empty string.
-@red{Warning}: new lines produced by ξ ... become part of the original current line.
+@red{Warning}: new lines produced by ξ ... become part of the original current line.}
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -838,47 +852,47 @@ In the results proper they are spaces, of course.}}}
 
 @subsection{Miscellaneous instructions}
 
-@subsubsub*section[#:tag "M" "M"@larger{ξ}]
+@deffmt[#:tag "M" "Mξ"]{
 
 Memorizes the current padding mode, field width, tabulator offset and sign mode,
 executes the instruction and restores the memorized state.
-@red{Warning}: new lines produced by ξ become part of the original current line.
+@red{Warning}: new lines produced by ξ become part of the original current line.}
 
-@subsubsub*section[#:tag ":" ":"]
+@deffmt[#:tag ":" ":"]{
 
 Exits from @seclink["compound" "a compound instruction"]
 or from a format-procedure or format-string called with instruction @seclink["K" "K"].
-At top level same as instruction @bold{;}.
+At top level same as instruction @bold{;}.}
 
-@subsubsub*section[#:tag ";" ";"]
+@deffmt[#:tag ";" ";"]{
 
-Exits from the top level format-procedure.
+Exits from the top level format-procedure.}
 
-@subsubsub*section[#:tag "S" "S"]
+@deffmt[#:tag "S" "S"]{
 
-Skips one datum.
+Skips one datum.}
 
-@subsubsub*section[#:tag "~" @larger{~}]
+@deffmt["~"]{
 
 Positions the write head at the end of the current line and
 writes all remaining data separated by spaces and terminated by a newline.
 Same as @code{"!(&n*(w!x)/)"}.
 Usually it is wise to write @code{"&x~"} or @code{"&|~"}
 in order to separate the remaining output from output already produced
-and to avoid writing over already generated output.
+and to avoid writing over already generated output.}
 
-@subsubsub*section[#:tag "J" "J"]
+@deffmt[#:tag "J" "J"]{
 
-No operation.
+No operation.}
 
-@subsubsub*section[#:tag "G" "G"]
+@deffmt[#:tag "G" "G"]{
 
 Consumes a datum which must be a natural number(exact-nonnegative-integer) or @code{#f}.
 It is supposed to be a time measured in seconds from the platform specific starting time.
 @code{#f} is for the current time.
 The time is displayed as: @literal["DDD,◦dd◦MMM◦yyyy◦hh:mm:ss◦±hhmm"],
 exactly 31 characters.
-Instruction G limits the argument to less than 2@superscript{32}.
+Instruction G limits the argument to less than 2@superscript{32}.}
 
 @tabular[
  #:sep @hspace[1]
@@ -913,8 +927,7 @@ In the results proper they are spaces, of course.}}}
 
 The following produces an exception:
 
-@interaction[
-(require "fmt.rkt")
+@Interaction[
 ((fmt "G") (expt 2 32))]
 
 @subsection[#:tag "unfolding"]{Unfolding}
@@ -934,7 +947,7 @@ Unfolding is protected against cycles such as in a mutable pair whose @scheme[mc
 or a vector containing itself as an element.
 An element that causes a cycle is not unfolded. 
 
-@subsubsub*section[#:tag "U" "U"]
+@deffmt[#:tag "U" "U"]{
 
 Consumes a datum and unfolds it. Examples: 
 
@@ -946,27 +959,24 @@ Consumes a datum and unfolds it. Examples:
 @scheme[((fmt "U~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
 @scheme[((fmt "U~") #((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (code:comment @#,t{Pad individual elements of a list.})
- (code:comment @#,t{L3 : left allignment in fields of 3 characters.})
- (code:comment @#,t{U#D : unfold and display each element.})
- (define a '("   a    " "    b" "c    "))
- ((fmt "L3U#D") a)]
+@Interaction/no-prompt[
+(code:comment @#,t{Pad individual elements of a list.})
+(code:comment @#,t{L3 : left allignment in fields of 3 characters.})
+(code:comment @#,t{U#D : unfold and display each element.})
+(define a '("   a    " "    b" "c    "))
+((fmt "L3U#D") a)]
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (define p (mcons 'a 'b))
- (set-mcdr! p p)
- ((fmt "U~") p)]
+@Interaction/no-prompt[
+(define p (mcons 'a 'b))
+(set-mcdr! p p)
+((fmt "U~") p)]
 
-@interaction/no-prompt[
- (require "fmt.rkt")
- (define v (vector 1 2))
- (vector-set! v 1 v)
- ((fmt "US~") v)]
+@Interaction/no-prompt[
+(define v (vector 1 2))
+(vector-set! v 1 v)
+((fmt "US~") v)]}
 
-@subsubsub*section[#:tag "V" "V"]
+@deffmt[#:tag "V" "V"]{
 
 Consumes and recursively unfolds the next datum in depth first order. Examples:
 
@@ -978,25 +988,24 @@ Consumes and recursively unfolds the next datum in depth first order. Examples:
 @scheme[((fmt "V~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
 @scheme[((fmt "V~") #((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}
 
-@interaction[
- (require "fmt.rkt")
- (define v (vector 'a 'b 'c))
- (vector-set! v 1 v)
- ((fmt "V~") v)]
-because the second element (index 1) causes a cycle.
+@Interaction[
+(define v (vector 'a 'b 'c))
+(vector-set! v 1 v)
+((fmt "V~") v)]
+because the second element (index 1) causes a cycle.}
 
-@subsubsub*section[#:tag "Z" "Z"]
+@deffmt[#:tag "Z" "Z"]{
 
-Consumes all remaining data and recursively unfolds the list of these data.
+Consumes all remaining data and recursively unfolds the list of these data.}
 
-@subsubsub*section[#:tag "Y" "Y"]
+@deffmt[#:tag "Y" "Y"]{
 
 Consumes a datum, which must be a number.
 It is decomposed into its real and imaginary part.
 These are consed as two real numbers to the remaining data,
-the real part becoming the first next datum, the imaginary part the second one.
+the real part becoming the first next datum, the imaginary part the second one.}
 
-@subsubsub*section[#:tag "%" "%"]
+@deffmt[#:tag "%" "%"]{
 
 Consumes a datum, which must be a rational number.
 In Racket all real numbers, @code{+nan.0}, @code{+inf.0} or @code{-inf.0} excluded,
@@ -1005,14 +1014,14 @@ The number is decomposed into its numerator and denominator.
 These are consed as two exact integer numbers to the remaining data,
 the numerator becoming the first next datum, the denominator the second one.
 The sign is associated with the numerator, the denominator always being positive.
-Zero, @code{+0.0} and @code{-0.0} included, are treated as @code{0}.
+Zero, @code{+0.0} and @code{-0.0} included, are treated as @code{0}.}
 
-@subsubsub*section[#:tag "\\" "\\\\"]
+@deffmt["\\"]{
 
 A single back-slash, but within a string an escaping back-slash is required.
 Consumes a datum, which must be a number.
 The number is consumed and its @code{magnitude} and @code{angle} are added to the remaining data.
-The magnitude and angle of exact zero are zero.
+The magnitude and angle of exact zero are zero.}
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -1035,13 +1044,13 @@ displays:
 
 where @code{18014398509481984} = @code{(expt 2 54)}.
 
-@interaction/no-prompt[(require "fmt.rkt")
+@Interaction/no-prompt[
 ((fmt "\\dxd") 0)
 ((fmt "\\dxd") 0.0)]
 
 @subsection{Procedure calls}
 
-@subsubsub*section[#:tag "λ" @larger{λ}]
+@deffmt[ "λ"]{
 
 Consumes the next datum, which must be a procedure.
 The procedure must accept one argument,
@@ -1059,9 +1068,9 @@ If the @italic{@code{port}} or @italic{@code{port-arg}}-argument of the format-p
 @racket['current] or @racket['cur] and
 the procedure alters parameter @racket[current-output-port],
 the format-procedure sticks to the output-port as was found in this parameter
-before the alteration.
+before the alteration.}
 
-@subsubsub*section[#:tag "K" "K"]
+@deffmt[#:tag "K" "K"]{
 
 Consumes the next datum, which must be a format-procedure or a format-string.
 If a format-string is given, it is checked and translated,
@@ -1071,8 +1080,8 @@ If a format-procedure is given, its port is ignored.
 The instructions are executed as part of the calling format-procedure.
 The called format-procedure inherits the padding mode, tabulator and sign mode from the caller.
 If it alters the state, the alterations remain effective after return.
-Instructions @seclink["A" "A"], @seclink["@" "@"], @seclink["$" "$"] and @seclink["M" "M"]
-can be used to preserve the padding mode, tabulator offset and sign mode.
+Instructions @elemref["A" "A"], @elemref["@" "@"], @elemref["$" "$"] and @elemref["M" "M"]
+can be used to preserve the padding mode, tabulator offset and sign mode.}
 
 @section{Reuse of format-procedures}
 
@@ -1175,57 +1184,57 @@ with its base at the bottom and all other lines centred above the bottom line.
 @tabular[
  #:sep @hspace[3]
  (list
-  (list @secref[#:underline? #f]{A} "Preserve padding")
-  (list @secref[#:underline? #f]{B} "Binary numerical format")
-  (list @secref[#:underline? #f]{C} "Centred padding")
-  (list @secref[#:underline? #f]{D} "Display")
-  (list @secref[#:underline? #f]{E} "Scientific numerical format")
-  (list @secref[#:underline? #f]{F} "Decimal expansion numerical format")
-  (list @secref[#:underline? #f]{G} "Date and time")
-  (list @secref[#:underline? #f]{H} "Hexadecimal numerical format")
-  (list @secref[#:underline? #f]{I} "Integer numerical format")
-  (list @secref[#:underline? #f]{J} "No operation")
-  (list @secref[#:underline? #f]{K} "Call fmt-procedure or format-string")
-  (list @secref[#:underline? #f]{L} "Left padding")
-  (list @secref[#:underline? #f]{M} "Preserve state (padding, sign-mode and tabulator)")
-  (list @secref[#:underline? #f]{N} "No padding")
-  (list @secref[#:underline? #f]{O} "Octal numerical format")
-  (list @secref[#:underline? #f]{=} "Decimal numerical format")
-  (list @secref[#:underline? #f]{P} "Print")
-  (list @secref[#:underline? #f]{Q} "Conditional")
-  (list @secref[#:underline? #f]{R} "Right padding")
-  (list @secref[#:underline? #f]{S} "Skip")
-  (list @secref[#:underline? #f]{T} "Tabulator")
-  (list @secref[#:underline? #f]{U} "Unfold")
-  (list @secref[#:underline? #f]{V} "Unfold recursively")
-  (list @secref[#:underline? #f]{W} "Write")
-  (list @secref[#:underline? #f]{X} "Space")
-  (list @secref[#:underline? #f]{Y} "Decompose complex number")
-  (list @secref[#:underline? #f]{Z} "Unfold recursively")
-  (list @seclink[#:underline? #f "simple-compound" "(...)"] "compound instruction")
-  (list @seclink[#:underline? #f "special-compound" "[...]"] "compound instruction")
-  (list @seclink["simple-literal" "'κ ...'" #:underline? #f] "Literal data")
-  (list @seclink["compound-literal" "^'κ ...'" #:underline? #f] "Literal data")
-  (list @secref[#:underline? #f]{%} "Decompose in numerator and denominator")
-  (list @secref[#:underline? #f]{\} "Decompose in magnitude and angle")
-  (list @secref[#:underline? #f]{/} "Newline")
-  (list @secref[#:underline? #f]{|} "Newline but not double")
-  (list @secref[#:underline? #f]{~} "Display all remaining data")
-  (list @secref[#:underline? #f]{*ξ} "Repeat until no more data")
-  (list @secref[#:underline? #f]{νξ} "Repeat ν times")
-  (list @secref[#:underline? #f]{!} "When more data left")
-  (list @secref[#:underline? #f]{?} "Unless more data left")
-  (list @secref[#:underline? #f]{+} "Sign mode on")
-  (list @secref[#:underline? #f]{-} "Sign mode off")
-  (list @secref[#:underline? #f]{$} "Preserve sign mode")
-  (list @secref[#:underline? #f]{:} "Local exit")
-  (list @secref[#:underline? #f]{;} "Top level exit")
-  (list @secref[#:underline? #f]{&} "Tabulate to end of line")
-  (list @seclink[#:underline? #f "@"] "Preserve tabulator")
-  (list @secref[#:underline? #f]{<} "Relative tab backward")
-  (list @secref[#:underline? #f]{>} "Relative tab forward")
-  (list @secref[#:underline? #f]{_νμξξ} "Iteration")
-  (list @secref[#:underline? #f]{λ} "Call procedure")
-  (list @secref[#:underline? #f]{sel} "Instruction selector"))]
+  (list @elemref["A"]{A} "Preserve padding")
+  (list @elemref["B"]{B} "Binary numerical format")
+  (list @elemref["C"]{C} "Centred padding")
+  (list @elemref["D"]{D} "Display")
+  (list @elemref["E"]{E} "Scientific numerical format")
+  (list @elemref["F"]{F} "Decimal expansion numerical format")
+  (list @elemref["G"]{G} "Date and time")
+  (list @elemref["H"]{H} "Hexadecimal numerical format")
+  (list @elemref["I"]{I} "Integer numerical format")
+  (list @elemref["J"]{J} "No operation")
+  (list @elemref["K"]{K} "Call fmt-procedure or format-string")
+  (list @elemref["L"]{L} "Left padding")
+  (list @elemref["M"]{M} "Preserve state (padding, sign-mode and tabulator)")
+  (list @elemref["N"]{N} "No padding")
+  (list @elemref["O"]{O} "Octal numerical format")
+  (list @elemref["P"]{P} "Print")
+  (list @elemref["Q"]{Q} "Conditional")
+  (list @elemref["R"]{R} "Right padding")
+  (list @elemref["S"]{S} "Skip")
+  (list @elemref["T"]{T} "Tabulator")
+  (list @elemref["U"]{U} "Unfold")
+  (list @elemref["V"]{V} "Unfold recursively")
+  (list @elemref["W"]{W} "Write")
+  (list @elemref["X"]{X} "Space")
+  (list @elemref["Y"]{Y} "Decompose complex number")
+  (list @elemref["Z"]{Z} "Unfold recursively")
+  (list @elemref["="]{=} "Decimal numerical format")
+  (list @elemref["simple-compound"]{(...)} "compound instruction")
+  (list @elemref["special-compound"]{[...]} "compound instruction")
+  (list @elemref["simple-literal"]{'κ ...'} "Literal data")
+  (list @elemref["compound-literal"]{^'κ ...'} "Literal data")
+  (list @elemref["%"]{%} "Decompose in numerator and denominator")
+  (list @elemref["\\"]{\} "Decompose in magnitude and angle")
+  (list @elemref["/"]{/} "Newline")
+  (list @elemref["|"]{|} "Newline but not double")
+  (list @elemref["~"]{~} "Display all remaining data")
+  (list @elemref["*ξ"]{*ξ} "Repeat until no more data")
+  (list @elemref["νξ"]{νξ} "Repeat ν times")
+  (list @elemref["!"]{!} "When more data left")
+  (list @elemref["?"]{?} "Unless more data left")
+  (list @elemref["+"]{+} "Sign mode on")
+  (list @elemref["-"]{-} "Sign mode off")
+  (list @elemref["$"]{$} "Preserve sign mode")
+  (list @elemref[":"]{:} "Local exit")
+  (list @elemref[";"]{;} "Top level exit")
+  (list @elemref["&"]{&} "Tabulate to end of line")
+  (list @elemref["@" "@"] "Preserve tabulator")
+  (list @elemref["<"]{<} "Relative tab backward")
+  (list @elemref[">"]{>} "Relative tab forward")
+  (list @elemref["_νμξξ"]{_νμξξ} "Iteration")
+  (list @elemref["λ"]{λ} "Call procedure")
+  (list @elemref["sel"]{(ξ...)} "Instruction selector"))]
 
 @larger{@larger{@@bold{The end}}}
