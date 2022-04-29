@@ -663,7 +663,7 @@ as shown in the following example:
 @code{((fmt "H") -0.0)} → @code{"-0"} ; Because @code{(eqv? 0.0 -0.0)} → @code{#f}
 
 @subsection{Sign mode}
-The sign mode is relevant for the numerical instructions @seclink["I" "I"],
+The sign mode is relevant for the numerical instructions @elemref["I" "I"],
 @elemref["F" "F"], @elemref["E" "E"], @elemref["B" "B"], @elemref["O" "O"], @elemref["H" "H"] and
 @elemref["="  "="].
 When sign mode is off, positive numbers get no sign.
@@ -683,7 +683,7 @@ Instruction @elemref["$" "$"] can be used to restore the previous sign mode.
 
 @deffmt["+"]{
 Switches sign mode on.}
-@deffmt[#:tag "-"]{
+@deffmt["-"]{
 Switches sign mode off.}
 
 @deffmt[#:tag "$" "$ξ"]{
