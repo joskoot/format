@@ -3,7 +3,7 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
 
 @(define-syntax (deffmt stx)
   (syntax-case stx ()
@@ -434,7 +434,7 @@ the instructions
 @elemref["B" "B"],
 @elemref["O" "O"],
 @elemref["H" "H"] and
-@elemref["=" @bold{@bold{@larger["="]}}].
+@elemref["=" "="].
 When padding is switched on,
 these instructions add heading and/or trailing spaces
 if otherwise less characters would be generated than indicated by the field width.
@@ -632,7 +632,7 @@ Displays a real number in octal notation.}
 
 Displays a real number in hexadecimal notation.}
 
-@deffmt[#:tag "=" "=}"]{
+@deffmt[#:tag "=" "="]{
 
 Displays a real number in decimal notation.}
 
@@ -664,8 +664,8 @@ as shown in the following example:
 
 @subsection{Sign mode}
 The sign mode is relevant for the numerical instructions @seclink["I" "I"],
-@seclink["F" "F"], @seclink["E" "E"], @seclink["B" "B"], @seclink["O" "O"], @seclink["H" "H"] and
-@seclink["=" (bold (bold "="))].
+@elemref["F" "F"], @elemref["E" "E"], @elemref["B" "B"], @elemref["O" "O"], @elemref["H" "H"] and
+@elemref["="  "="].
 When sign mode is off, positive numbers get no sign.
 When sign mode is on, positive numbers, exact zero and @code{+0.0} get a plus sign.
 Negative numbers always get a minus sign, @code{-0.0} included.
