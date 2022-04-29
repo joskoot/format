@@ -3,7 +3,7 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
 
 @(define (inset . x) (apply nested #:style 'inset x))
 @(define (note . x) (inset (apply smaller x)))
@@ -17,6 +17,11 @@
   (define prop:red (color-property "red"))
   (define red (style #f (list prop:red)))
   (element red str))
+
+@(define (green str)
+  (define prop:red (color-property "green"))
+  (define green (style #f (list prop:red)))
+  (element green str))
 
 @(define(minus) (element 'tt "-"))
 
@@ -266,7 +271,7 @@ Separators, id est white space and commas, are irrelevant except in the followin
   
   @item{Character @code{#\null} is not white space.
    It must not appear outside @seclink["literal" "literals"].@(linebreak)
-   Advice: never use @code{#\null} or its equivalents such as @racket["\u0"] in a format string.})]
+   Advice: never use @code{#\null} or its equivalents such as @code{#\u0} in a format string.})]
 
 @section[#:tag "fmt-instructions"]{Format-instructions}
 
