@@ -609,7 +609,7 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "*E10.3.2") 2/3 2.3e-2)} → @code{"◦6.667e-01◦2.300e-02"}@(linebreak)
 @code{((fmt "E.5") 2/3)} → @code{"6.66667e-1"}@(linebreak)
 @code{((fmt "E15.5.4") 2/3)} → @code{"◦◦6.66667e-0001"}@(linebreak)
-@code{((fmt "EXE") #e-1e1000000 -1.0e1000000)} → @code{"-1.e+100000◦-inf.0"}@(linebreak)
+@code{((fmt "EXE") #e-1e+100000 -1.0e+100000)} → @code{"-1.e+100000◦-inf.0"}@(linebreak)
 @code{((fmt "EXE") #e-1e-100000 -1.0e-100000)} → @code{"-1.e-100000◦-0.e+0"}@(linebreak)
 @code{((fmt "E15 5 3") 0)} → @code{"◦◦◦0.00000e+000"} ; all decimal figures 0.@(linebreak)
 @code{((fmt "e5 5 3") -0.0)} → @code{"-0.00000e+000"}@(linebreak)
