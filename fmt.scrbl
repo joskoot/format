@@ -1,6 +1,6 @@
 #lang scribble/manual
 @(require scribble/eval scribble/core (for-label "fmt.rkt" racket) racket)
- 
+
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
 @(defmodule fmt/fmt #:packages ())
@@ -776,7 +776,7 @@ In the results proper they are spaces, of course.}}}
 
 Repeated execution of ξ until no data remain.}
 
-@deffmt[#:tag "νξ"]{
+@deffmt[#:tag "νξ" "νξ"]{
 
 Instruction ξ is executed ν times.}
 
@@ -787,7 +787,7 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "R3 *D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
 @code{((fmt "R# #D") 3 4 1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}
 
-@deffmt[#:tag "_νμξξ" ]{
+@deffmt[#:tag "_νμξξ" "_νμξξ" ]{
 
 Executes the first instruction ν times but after every μ times the second instruction is inserted.}
 Examples:
