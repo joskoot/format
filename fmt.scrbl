@@ -3,8 +3,8 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@;@(defmodule fmt/fmt #:packages ())
-@(defmodule "fmt.rkt" #:packages ())
+@(defmodule fmt/fmt #:packages ())
+@;@(defmodule "fmt.rkt" #:packages ())
 
 @(define-syntax (deffmt stx)
   (syntax-case stx ()
