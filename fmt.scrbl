@@ -3,7 +3,8 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@(defmodule fmt/fmt #:packages ())
+@;@(defmodule fmt/fmt #:packages ())
+@(defmodule "fmt.rkt" #:packages ())
 
 @(define-syntax (deffmt stx)
   (syntax-case stx ()
@@ -61,7 +62,7 @@ Module
    "racket%2Fformat%29")
   "racket/format")
 provides elaborated padding and several numerical formats,
-but is somewhat verbose when the details are to be specified.
+but is somewhat verbose when details are to be specified.
 Which functions and shape a simple formatter should have
 is a matter of personal taste, I think.
 In this document I show a simple formatter that
@@ -76,7 +77,7 @@ several @seclink["numerical" "numerical formats"],
 @seclink["iteration" "iteration"] and
 @seclink["compound" "compound"] and
 @seclink["condition" "conditional"] instructions are included.
-Field widths, tabulator positions and repetition counts can be constants within the format,
+Field widths, tabulator positions and iteration counts can be constants within the format,
 but can also be obtained from the data.
 @red{Warning}: @seclink["Padding" "padding"]
 and @seclink["Tabulation" "tabulation"] are implemented by insertion of spaces and
@@ -213,7 +214,7 @@ or may produce unexpected results:
 
 Most examples in this document have the form:
 
-@code{((fmt fmt-arg ...) datum ...)}
+@inset{@code{((fmt fmt-arg ...) datum ...)}}
 
 Procedure @racket[fmt] does not repeat parsing and translation
 when called repeatedly with the same arguments.
@@ -256,7 +257,7 @@ even when no hashes would be used.}
 A format-string describes a format-procedure in its own simple language.
 The format-instructions are non verbose.
 Each elementary instruction consists of one single character,
-possibly preceded by a repetition count and followed by one or more arguments,
+possibly preceded by an iteration count and followed by one or more arguments,
 such as a field width or tabulator position.
 A format-string can include literal data, for example for headers.
 There is no distinction between lower case and capital letters, except within literal data.
@@ -273,7 +274,7 @@ Separators, id est white space and commas, are irrelevant except in the followin
   @seclink["arguments" "numerical arguments"].
   These arguments may be omitted starting from the last one.
   However, when omitting one or more numerical arguments where the next instruction
-  starts with a token that can be interpreted as a numerical argument, such as a repetition count,
+  starts with a token that can be interpreted as a numerical argument, such as an iteration count,
   a comma is required as separator, optionally preceded and/or followed by other separators.
   Hence, no comma must appear before any numerical argument belonging to the preceding instruction.
   White space is required between two numerical arguments if the first character of the second one
@@ -341,8 +342,8 @@ the output and exits normally when less than @racket[5] data are found.
 
 In the description of the instructions, ξ represents an argument consisting of an instruction.
 ν, μ and ε represent numerical arguments such as a field width or a tabulator position.
-A repetition count has the same form as a numerical argument.
-Omitted numerical arguments are zero. An omitted repetition count is one.
+An iteration count has the same form as a numerical argument.
+Omitted numerical arguments are zero. An omitted iteration count is one.
 They can have one of the following three forms:
 
 @tabular[
@@ -366,7 +367,7 @@ A period without immediately preceding decimal figure is\ninterpreted as zero.")
    @list[
     "Consumes a datum, which must be a natural number ("
     @nonbreaking{@racket[exact-nonnegative-integer?]}
-    "). This number is used as numerical argument or repetition count."]))]
+    "). This number is used as numerical argument or iteration count."]))]
 
 Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
 In the results proper they are spaces, of course.}}}
@@ -375,7 +376,7 @@ In the results proper they are spaces, of course.}}}
 @code{((fmt "I5.3") 12)} → @code{"◦◦012"} integer format, field width 5, at least 3 decimal figures.
 @(linebreak)
 @code{((fmt "I##") 5 3 12)} → @code{"◦◦012"} idem taking the arguments from the data.@(linebreak)
-@code{((fmt "#'x'") 5)} → @code{"xxxxx"} taking the repetition count from the data.
+@code{((fmt "#'x'") 5)} → @code{"xxxxx"} taking the iteration count from the data.
 
 @subsection{Elementary format-instructions}
 
@@ -934,7 +935,7 @@ The following produces an exception:
 
 Unfolding means that the elements of a vector or immutable list will be treated as separate data.
 These data are preceded by the number of elements.
-This exact non-negative integer number can be used as a repetition-count with instruction
+This exact non-negative integer number can be used as an iteration-count with instruction
 @elemref["νξ" "νξ"].
 A structure (that satisfies predicate @scheme[struct?]) is first converted to a vector and
 the latter is unfolded.
