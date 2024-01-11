@@ -312,7 +312,7 @@ the numerator becoming the first datum, the denominator the second one.
 Subsequent format-instructions can treat the numerator and denominator separately.
 Example:
 
-@code{((fmt "%I':'I") 30/-40)} → @code{"-3:4"}
+@code{((fmt "%I':'I") (/ 30 -40))} → @code{"-3:4"}
 
 In this example instruction @elemref["%"]{%} consumes the datum @racket[30/-40] and adds
 the numerator @racket[-3] and denominator @racket[4] to the list of remaining data,
