@@ -11,11 +11,11 @@
    ((_ #:tag tag x y ...)
   #'(begin
      (elemtag tag)
-     (defthing #:kind "fmt instruction" #:link-target? #f x #,(hspace 0) y ...)))
+     (defidform #:kind "fmt instruction" #:link-target? #f x y ...)))
    ((_ x y ...)
   #'(begin
      (elemtag x)
-     (defthing #:kind "fmt instruction" #:link-target? #f x #,(hspace 0) y ...)))))
+     (defidform #:kind "fmt instruction" #:link-target? #f x y ...)))))
 
 @(define-syntax-rule (Interaction x ...)
   (interaction #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
