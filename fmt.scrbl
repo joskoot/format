@@ -104,8 +104,7 @@ because the produced output is gathered in a string before being committed to th
  Procedure @racket[fmt] returns a procedure, in particular a format-procedure,
  satisfying predicate @racket[fmt?] which implies satisfying predicate @racket[procedure?].
 
- The @racket[port]-argument passed to procedure @racket[fmt]
- can be placed at arbitrary position before,
+ The @racket[port]-argument can be placed at arbitrary position before,
  among or after the @racket[format]-arguments.
  The symbols @racket['string], @racket['current] and @racket['argument] can be abbreviated as
  @racket['str], @racket['cur] and @racket['arg].
