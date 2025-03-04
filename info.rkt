@@ -1,5 +1,5 @@
 #lang info
-;; (define scribblings (list (list "fmt.scrbl")))
+(define scribblings (list (list "fmt.scrbl")))
 ;; (define name "planet-fmt")
 (define blurb (list "A simple formatter"))
 ;; (define primary-file "fmt.rkt")
