@@ -15,8 +15,9 @@
 ; When used with equal arguments for procedures with side effects,
 ; the side effects are produced for the first call only.
 
-; Enable or disable define-hash to use hashes.
-; When disabled, define-hash expands to a normal define-form.
+; Enable or disable use-hash? to use hashes.
+; When disabled, define-hashed expands to a normal define-form.
+
 (define-for-syntax use-hash? #t)
 
 (define-syntax (define-hashed stx)
@@ -112,7 +113,9 @@
       ; Handle port argument.
       (if port (error 'fmt "multiple port argument: ~s" arg)
        (loop rest fmt-str separator (extend-port-arg arg) fmts))) ; accept arg as port
-     (else (raise-type-error 'fmt "or/c output-port? string? fmt?" arg))))))
+     (else
+      (raise-type-error 'fmt
+       "or/c output-port? 'string 'str 'current 'cur 'argument 'arg fmt?" arg))))))
   (loop args "" "" #f '()))
 
 (define (extend-port-arg arg)
@@ -713,7 +716,7 @@
   (let ((datum (pop-datum run-state)))
    (push-data run-state
     (if (string? datum)
-     (strip-head-and-trail-spaces datum)
+     (string-trim datum #rx" *")
      datum))))
  (printer run-state display))
 
@@ -728,18 +731,6 @@
     (get-output-string out-str)
     (run-state-fieldwidth run-state))
    (run-state-temp-port run-state))))
-
-(define (strip-head-and-trail-spaces str)
- (let ((len (string-length str)))
-  (let head-loop ((n 0))
-   (cond
-    ((>= n len) "")
-    ((char=? (string-ref str n) #\space) (head-loop (add1 n)))
-    (else
-     (let tail-loop ((m len))
-      (let ((m-1 (sub1 m)))
-       (if (char=? (string-ref str m-1) #\space) (tail-loop m-1)
-        (if (and (= n 0) (= m len)) str (substring str n m))))))))))
 
 ;---------------------------------------------------------------------------------------------------
 ; Section 4b
@@ -901,9 +892,9 @@
    (let*
     ((datum
       (pop-datum run-state natural-or-false? "natural number or false"))
-     (dummy (when (and datum (>= datum (expt 2 32)))
-             (error 'fmt "too large argument for instruction G: ~s"
-      datum)))
+     (dummy
+      (when (and datum (>= datum (expt 2 32)))
+       (error 'fmt "too large argument for instruction G: ~s" datum)))
      (date/time (seconds->date (or datum (current-seconds)))))
     (map (λ (selector) (selector date/time)) selectors)))))
 
@@ -1030,7 +1021,7 @@
 
 ; Auxiliaries for format e-fmt
 
-(define order-of-magnitude
+#;(define order-of-magnitude
  (let*
   ((exact-log (λ (x) (inexact->exact (log x))))
    (inverse-exact-log10 (/ (exact-log 10))))
