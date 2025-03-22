@@ -1,3 +1,3 @@
 #lang setup/infotab
-(define collection "fmt")
+(define collection "format")
 (define scribblings '(("fmt.scrbl" ())))
