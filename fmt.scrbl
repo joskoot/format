@@ -3,45 +3,45 @@
 
 @title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
-@;@(defmodule fmt/fmt #:packages ())
-@(defmodule "fmt.rkt" #:packages ())
+@(defmodule format/fmt #:packages ())
+@;@(defmodule "fmt.rkt" #:packages ())
 
 @(define-syntax (deffmt stx)
-  (syntax-case stx ()
-   ((_ #:tag tag x y ...)
-  #'(begin
-     (elemtag tag)
-     (defidform #:kind "fmt instruction" #:link-target? #f x y ...)))
-   ((_ x y ...)
-  #'(begin
-     (elemtag x)
-     (defidform #:kind "fmt instruction" #:link-target? #f x y ...)))))
+   (syntax-case stx ()
+     ((_ #:tag tag x y ...)
+      #'(begin
+          (elemtag tag)
+          (defidform #:kind "fmt instruction" #:link-target? #f x y ...)))
+     ((_ x y ...)
+      #'(begin
+          (elemtag x)
+          (defidform #:kind "fmt instruction" #:link-target? #f x y ...)))))
 
 @(define-syntax-rule (Interaction x ...)
-  (interaction #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
-   (print-as-expression #f))) x ...))
+   (interaction #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
+                                                 (print-as-expression #f))) x ...))
 
 @(define-syntax-rule (Interaction/no-prompt x ...)
-  (interaction/no-prompt #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
-   (print-as-expression #f))) x ...))
+   (interaction/no-prompt #:eval (make-base-eval #:lang '(begin (require racket "fmt.rkt")
+                                                           (print-as-expression #f))) x ...))
 
 @(define (inset . x) (apply nested #:style 'inset x))
 @(define (note . x) (inset (apply smaller x)))
 
 @(define-syntax (example stx)
-  (syntax-case stx ()
-   ((_ a)
-  #'(begin @racket[a] @literal{ → } @element['tt (format "~a" a)] @(linebreak)))))
+   (syntax-case stx ()
+     ((_ a)
+      #'(begin @racket[a] @literal{ → } @element['tt (format "~a" a)] @(linebreak)))))
 
 @(define (red str)
-  (define prop:red (color-property "red"))
-  (define red (style #f (list prop:red)))
-  (element red str))
+   (define prop:red (color-property "red"))
+   (define red (style #f (list prop:red)))
+   (element red str))
 
 @(define (green str)
-  (define prop:red (color-property "green"))
-  (define green (style #f (list prop:red)))
-  (element green str))
+   (define prop:red (color-property "green"))
+   (define green (style #f (list prop:red)))
+   (element green str))
 
 @(define(minus) (element 'tt "-"))
 
@@ -56,11 +56,7 @@ importance, but not to the extent that a highly finished presentation is require
 is procedure @racket[format].
 It is a handy tool, @nonbreaking{but in some} cases may not provide enough functionality.
 Module
-@(hyperlink
-  (string-append
-   "https://docs.racket-lang.org/reference/strings.html?q=racket%2Fformat#%28mod-path._"
-   "racket%2Fformat%29")
-  "racket/format")
+@seclink["format" #:doc '(lib "scribblings/reference/reference.scrbl")]{racket/format}
 provides elaborated padding and several numerical formats,
 but is somewhat verbose when the details are to be specified.
 Which functions and shape a simple formatter should have
@@ -98,14 +94,13 @@ format-procedure call may be subjected to a platform dependent limit,
 because the produced output is gathered in a string before being committed to the port.
 
 @defproc[(fmt
-          (format (or/c string? fmt?)) ...
-          (port (or/c output-port? 'string 'str 'current 'cur 'argument 'arg) 'string))
+           (format (or/c string? fmt?)) ...
+           (port (or/c output-port? 'string 'str 'current 'cur 'argument 'arg) 'string))
          (and/c procedure? fmt?)]{
  Procedure @racket[fmt] returns a procedure, in particular a format-procedure,
  satisfying predicate @racket[fmt?] which implies satisfying predicate @racket[procedure?].
 
- The @racket[port]-argument passed to procedure @racket[fmt]
- can be placed at arbitrary position before,
+ The optional @racket[port]-argument can be placed at arbitrary position before,
  among or after the @racket[format]-arguments.
  The symbols @racket['string], @racket['current] and @racket['argument] can be abbreviated as
  @racket['str], @racket['cur] and @racket['arg].
@@ -128,22 +123,22 @@ because the produced output is gathered in a string before being committed to th
 Format-procedures are called as follows:
 
 @defproc[#:kind "" #:link-target? #f
- ((fmt
-     (format (or/c string? fmt?)) ...
-     (port (or/c output-port? 'string 'str 'current 'cur) 'string))
-    (datum any/c) ...)
-   (or/c void? string?)]
+         ((fmt
+            (format (or/c string? fmt?)) ...
+            (port (or/c output-port? 'string 'str 'current 'cur) 'string))
+          (datum any/c) ...)
+         (or/c void? string?)]
 @defproc[#:kind "" #:link-target? #f
-    ((fmt
-     (format (or/c string? fmt?)) ...
-     (port (or/c 'argument 'arg)))
-    (port-arg (or/c output-port? 'string 'str 'current 'cur))
-    (datum any/c) ...)
-   (or/c void? string?)]{
+         ((fmt
+            (format (or/c string? fmt?)) ...
+            (port (or/c 'argument 'arg)))
+          (port-arg (or/c output-port? 'string 'str 'current 'cur))
+          (datum any/c) ...)
+         (or/c void? string?)]{
 
-When @racket[fmt] is called with @racket[port]-argument
-@racket['argument] or @racket['arg]
-the produced format-procedure requires the data to be preceded by a @racket[port-arg]ument.
+ When @racket[fmt] is called with @racket[port]-argument
+ @racket['argument] or @racket['arg]
+ the produced format-procedure requires the data to be preceded by a @racket[port-arg]ument.
  
  In both forms the format-procedure formats the data according to the
  @racket[format]-arguments from which it was built and
@@ -154,30 +149,30 @@ the produced format-procedure requires the data to be preceded by a @racket[port
  
  @itemlist[
  (list
-  @item{If the argument @racket[port] cq @racket[port-arg] is
+   @item{If the argument @racket[port] cq @racket[port-arg] is
    @racket['current] or @racket['cur],
    the formatted data are committed to the current output-port
    and the format-procedure returns void.
    For this purpose parameter @racket[current-output-port] is consulted at the time the
    format-procedure is called,
    not at the time the format-procedure is made by procedure @racket[fmt].}
-  @item{If the argument @racket[port] cq @racket[port-arg] is
+   @item{If the argument @racket[port] cq @racket[port-arg] is
    an output-port, the formatted data are committed to this port
    and the format-procedure returns void.
-  A format-procedure made with
-  @nonbreaking{(@racket[fmt] (@racket[current-output-port]) @racket[format] ...)}
-  commits the formatted data to the @racket[current-output-port] as found in this parameter
-  at the time the format-procedure was made.}
-  @item{If the argument @racket[port] cq @racket[port-arg] is
+   A format-procedure made with
+   @nonbreaking{(@racket[fmt] (@racket[current-output-port]) @racket[format] ...)}
+   commits the formatted data to the @racket[current-output-port] as found in this parameter
+   at the time the format-procedure was made.}
+   @item{If the argument @racket[port] cq @racket[port-arg] is
    @racket['string] or @racket['str],
    the formatted data are returned as a string.})]}
 
 Examples:
 @margin-note{@element["sroman"]{@smaller{In these examples instruction @elemref["I" "I5"]
- is given exact integer numbers
- and displays them right justified in fields of 5 characters.@(linebreak)
- In the results `◦´ is used to show spaces.@(linebreak)
- In the results proper they are spaces, of course.}}}
+   is given exact integer numbers
+   and displays them right justified in fields of 5 characters.@(linebreak)
+   In the results `◦´ is used to show spaces.@(linebreak)
+   In the results proper they are spaces, of course.}}}
 @racket[((fmt "I5") 12)] → @code{"◦◦◦12"}@(linebreak)
 @racket[((fmt "I5" 'string) 12)] → @code{"◦◦◦12"}@(linebreak)
 @racket[((fmt "I5" 'current) 12)] → void, displays @code["◦◦◦12"]@(linebreak)
@@ -191,8 +186,8 @@ Forgetting the @italic{@racket[port-arg]}ument when calling a format-procedure m
 or may produce unexpected results:
 
 @Interaction/no-prompt[ (define my-fmt (fmt "I5" 'argument))
- (my-fmt 12)
- ((fmt 'arg "D") (open-output-string))]
+                       (my-fmt 12)
+                       ((fmt 'arg "D") (open-output-string))]
 
 @defproc[#:kind "predicate" (fmt? (object any/c)) boolean?]{
  Returns @racket[#t] if the argument is a format-procedure made by procedure @racket[fmt],
@@ -222,26 +217,26 @@ For this purpose it uses two hashes with the arguments as keys and
 the produced format-procedures or subprocedures as values.
 
 @inset{@code{(define port (open-output-nowhere))}@linebreak[]
-@code{(define my-fmt (fmt port "f17.15/"))}@linebreak[]
-@code{(for ((i (in-range #e1e6))) (my-fmt (random)))}}
+ @code{(define my-fmt (fmt port "f17.15/"))}@linebreak[]
+ @code{(for ((i (in-range #e1e6))) (my-fmt (random)))}}
 
 is not much faster than:
 
 @inset{@code{(define port (open-output-nowhere))}@linebreak[]
-@code{(for ((i (in-range #e1e6))) ((fmt port "f17.15/") (random)))}}
+ @code{(for ((i (in-range #e1e6))) ((fmt port "f17.15/") (random)))}}
 
 In the last example, @racket["f17.15/"] is parsed and translated once only.
 
 @ignore{@racket[fmt] can be implemented more efficiently by replacing it by a
-syntax that does the parsing and translation once when a program is compiled. In this form it
-would not parse and translate the format-strings each time a program is run.
-However, this would restrict @racket[fmt] to information available at expansion time only.
-As a procedure @racket[fmt] can handle format-strings and allows inclusion of format-procedures
-that are computed at run-time.
-Given procedure @racket[fmt] it is possible to construct a syntactic form,
-but with much less flexibility. The benefits would be small,
-for parsing and translation take only a small fraction of the time of the formatting proper,
-even when no hashes would be used.}
+ syntax that does the parsing and translation once when a program is compiled. In this form it
+ would not parse and translate the format-strings each time a program is run.
+ However, this would restrict @racket[fmt] to information available at expansion time only.
+ As a procedure @racket[fmt] can handle format-strings and allows inclusion of format-procedures
+ that are computed at run-time.
+ Given procedure @racket[fmt] it is possible to construct a syntactic form,
+ but with much less flexibility. The benefits would be small,
+ for parsing and translation take only a small fraction of the time of the formatting proper,
+ even when no hashes would be used.}
 
 @defproc[(fmt-clear-hash) void?]{
  Empties the hash tables used by @racket[fmt].
@@ -265,12 +260,12 @@ Separators, id est white space and commas, are irrelevant except in the followin
 
 @itemlist[
  (list
-  @item{Within a @seclink["literal" "literal"], separators are part of the literal.}
+   @item{Within a @seclink["literal" "literal"], separators are part of the literal.}
   
-  @item{No separator must appear within a @seclink["arguments" "numerical argument"]
+   @item{No separator must appear within a @seclink["arguments" "numerical argument"]
   or @seclink["arguments" "iteration count"].}
   
-  @item{Some instructions may be followed by one or more
+   @item{Some instructions may be followed by one or more
   @seclink["arguments" "numerical arguments"].
   These arguments may be omitted starting from the last one.
   However, when omitting one or more numerical arguments where the next instruction
@@ -279,22 +274,22 @@ Separators, id est white space and commas, are irrelevant except in the followin
   Hence, no comma must appear before any numerical argument belonging to the preceding instruction.
   White space is required between two numerical arguments if the first character of the second one
   could be parsed as belonging to the previous one.
- Commas do no harm when the argument or arguments of the instruction are format-instructions,
- because these never are optional.}
+  Commas do no harm when the argument or arguments of the instruction are format-instructions,
+  because these never are optional.}
   
-  @item{The start and end of a @seclink["literal" "literal"]
+   @item{The start and end of a @seclink["literal" "literal"]
   are marked by a single quote, but within a literal two
   immediately adjacent single quotes are read as one single quote belonging to the literal.
   Hence, where a literal is followed by another literal, a separator is required.}
   
-  @item{Character @code{#\null} is not white space.
-   It must not appear outside @seclink["literal" "literals"].@(linebreak)
-   Advice: never use @code{#\null} or its equivalents such as @code{#\u0} in a format string.})]
+   @item{Character @code{#\null} is not white space.
+  It must not appear outside @seclink["literal" "literals"].@(linebreak)
+  Advice: never use @code{#\null} or its equivalents such as @code{#\u0} in a format string.})]
 
 @section[#:tag "fmt-instructions"]{Format-instructions}
 
 @margin-note{@element["sroman"]{@smaller{
-See the @seclink["synopsis" "synopsis"] for a list of all format-instructions.}}}
+   See the @seclink["synopsis" "synopsis"] for a list of all format-instructions.}}}
 
 A format-procedure is given data to be formatted.
 A format-instruction that consumes a datum,
@@ -349,28 +344,31 @@ They can have one of the following three forms:
 @tabular[
  #:sep @hspace[3] #:style 'top #:column-properties '(top)
  (list
-  (list
-   @verbatim["δ...+"]
-   "A sequence of one or more decimal figures.")
+   (list
+     @verbatim["δ...+"]
+     "A sequence of one or more decimal figures.")
   
-  (list "" "")
+   (list "" "")
   
-  (list
-   @verbatim["δ...‹period›"]
-   "A sequence of zero or more decimal figures immediately followed by a period.
+   (list
+     @verbatim["δ...‹period›"]
+     "A sequence of zero or more decimal figures immediately followed by a period.
 A period without immediately preceding decimal figure is\ninterpreted as zero.")
   
-  (list "" "")
+   (list "" "")
   
-  (list
-   @verbatim["#"]
-   @list[
-    "Consumes a datum, which must be a natural number ("
-    @nonbreaking{@racket[exact-nonnegative-integer?]}
-    "). This number is used as numerical argument or repetition count."]))]
+   (list
+     @verbatim["#"]
+     @list[
+ "Consumes a datum, which must be a natural number ("
+ @nonbreaking{@racket[exact-nonnegative-integer?]}
+ "). This number is used as numerical argument or repetition count."]))]
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+@(define space-note
+   @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}})
+
+Examples: @space-note
 
 @code{((fmt "I5") 12)} → @code{"◦◦◦12"} integer format, field width 5.@(linebreak)
 @code{((fmt "I5.3") 12)} → @code{"◦◦012"} integer format, field width 5, at least 3 decimal figures.
@@ -381,45 +379,44 @@ In the results proper they are spaces, of course.}}}
 @subsection{Elementary format-instructions}
 
 @margin-note{@element["sroman"]{@smaller{See the Racket documentation:
- @hyperlink["http://docs.racket-lang.org/reference/printing.html"]{The Printer}
- for the distinction between @racket[display], @racket[write] and @racket[print].}}}
+   @hyperlink["http://docs.racket-lang.org/reference/printing.html"]{The Printer}
+   for the distinction between @racket[display], @racket[write] and @racket[print].}}}
 
 @deffmt["D"]{
 
-Consumes one datum and @racket[display]s it according to the current
-@seclink["Padding" "padding"] mode.
-If the datum is a string and padding is switched on,
-heading and trailing spaces are removed before the string is padded.
-No spaces are removed from or added to strings that are non trivial parts of the datum,
-for example in case the datum is a list of strings.
-In such a case you may want to unfold the list.
-This allows each element to be formatted individually. See section @secref["unfolding"].}
+ Consumes one datum and @racket[display]s it according to the current
+ @seclink["Padding" "padding"] mode.
+ If the datum is a string and padding is switched on,
+ heading and trailing spaces are removed before the string is padded.
+ No spaces are removed from or added to strings that are non trivial parts of the datum,
+ for example in case the datum is a list of strings.
+ In such a case you may want to unfold the list.
+ This allows each element to be formatted individually. See section @secref["unfolding"].}
 
 @deffmt["W"]{
 
-Consumes one datum and @racket[write]s it according to the current
-@seclink["Padding" "padding"] mode.}
+ Consumes one datum and @racket[write]s it according to the current
+ @seclink["Padding" "padding"] mode.}
 
 @deffmt["P"]{
 
-Consumes one datum and @racket[print]s it according to the current
-@seclink["Padding" "padding"] mode.}
+ Consumes one datum and @racket[print]s it according to the current
+ @seclink["Padding" "padding"] mode.}
 
 @deffmt["X"]{
 
-Displays one space.}
+ Displays one space.}
 
 @deffmt["/"]{
 
-Executes a newline instruction and marks the start of the new line.}
+ Executes a newline instruction and marks the start of the new line.}
 See @seclink["Tabulation" "tabulation"].
 
 @deffmt["|"]{
 
-Executes a newline instruction only if not at the start of the current line.}
+ Executes a newline instruction only if not at the start of the current line.}
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 @code{((fmt 'current "DXDXD")   "Jacob" 3 #\x)} → void, displays @code{Jacob◦3◦x}@(linebreak)
 @code{((fmt 'current "WXWXW")   "Jacob" 3 #\x)} → void, displays @code{"Jacob"◦3◦#\x}@(linebreak)
 @code{((fmt 'current "D") (list "Jacob" 3 #\x))} → void, displays @code{(Jacob◦3◦x)}@(linebreak)
@@ -453,71 +450,69 @@ it is useful only with a font of fixed character width.
 
 @deffmt["N"]{
 
-Switches padding off. No spaces are removed or added.}
+ Switches padding off. No spaces are removed or added.}
 
 @deffmt[#:tag "L" "Lν"]{
 
-For left alignment in fields of ν characters.}
+ For left alignment in fields of ν characters.}
 
 @deffmt[#:tag "R" "Rν"]{
 
-For right alignment in fields of ν characters.}
+ For right alignment in fields of ν characters.}
 
 @deffmt[#:tag "C" "Cν"]{
 
-For centred alignment in fields of ν characters.
-When needed, spaces are added to the left and to the right in order to match the field width.
-If the number of spaces to be added is even, say @italic{2k},
-then @italic{k} spaces are added both at the left and at the right.
-If the number of spaces to be added is odd, say @italic{2k+1},
-then @italic{k+1} spaces are added to the left and @italic{k} spaces to the right.}
+ For centred alignment in fields of ν characters.
+ When needed, spaces are added to the left and to the right in order to match the field width.
+ If the number of spaces to be added is even, say @italic{2k},
+ then @italic{k} spaces are added both at the left and at the right.
+ If the number of spaces to be added is odd, say @italic{2k+1},
+ then @italic{k+1} spaces are added to the left and @italic{k} spaces to the right.}
 
 @deffmt[#:tag "A" "Aξ"]{
 
-Memorizes the current padding mode and field width,
-executes instruction ξ and upon completion restores the memorized padding mode and field width.
+ Memorizes the current padding mode and field width,
+ executes instruction ξ and upon completion restores the memorized padding mode and field width.
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
-@code{((fmt "L5*D") 1 2 3)} → @code{"1◦◦◦◦2◦◦◦◦3◦◦◦◦"}@(linebreak)
-@code{((fmt "R5*D") 1 2 3)} → @code{"◦◦◦◦1◦◦◦◦2◦◦◦◦3"}@(linebreak)
-@code{((fmt "C5*D") 1 2 3)} → @code{"◦◦1◦◦◦◦2◦◦◦◦3◦◦"}@(linebreak)
-@code{((fmt "N  D") "◦◦Jacob◦◦")} → @code{"◦◦Jacob◦◦"} ; no spaces removed, nor added.@(linebreak)
-@code{((fmt "L0 D") "◦◦Jacob◦◦")} → @code{"Jacob"} ; spaces removed, no spaces added.@(linebreak)
-@code{((fmt "L8 D") "◦◦Jacob◦◦")} → @code{"Jacob◦◦◦"} ; spaces first removed, then added.
+ Examples: @space-note
+ @code{((fmt "L5*D") 1 2 3)} → @code{"1◦◦◦◦2◦◦◦◦3◦◦◦◦"}@(linebreak)
+ @code{((fmt "R5*D") 1 2 3)} → @code{"◦◦◦◦1◦◦◦◦2◦◦◦◦3"}@(linebreak)
+ @code{((fmt "C5*D") 1 2 3)} → @code{"◦◦1◦◦◦◦2◦◦◦◦3◦◦"}@(linebreak)
+ @code{((fmt "N  D") "◦◦Jacob◦◦")} → @code{"◦◦Jacob◦◦"} ; no spaces removed, nor added.@(linebreak)
+ @code{((fmt "L0 D") "◦◦Jacob◦◦")} → @code{"Jacob"} ; spaces removed, no spaces added.@(linebreak)
+ @code{((fmt "L8 D") "◦◦Jacob◦◦")} → @code{"Jacob◦◦◦"} ; spaces first removed, then added.
 }
 @subsection[#:tag "literal" "Literal data"]
 
 @deffmt[#:tag "simple-literal" "'κ ...'"]{
 
-Each κ is an arbitrary character,
-except that a single quote must be written as two immediately adjacent single quotes.
-Backslashes and double quotes must be escaped by backslashes as usual in a string,
-id est, as @literal{\\} or @literal{\"}.
-The string @literal{"κ ..."} is displayed according to the current padding mode.
-In literals the backslash can also be used for other escapes, for example:
+ Each κ is an arbitrary character,
+ except that a single quote must be written as two immediately adjacent single quotes.
+ Backslashes and double quotes must be escaped by backslashes as usual in a string,
+ id est, as @literal{\\} or @literal{\"}.
+ The string @literal{"κ ..."} is displayed according to the current padding mode.
+ In literals the backslash can also be used for other escapes, for example:
 
-@Interaction[
-((fmt "'a\nb'" 'cur))]}
+ @Interaction[
+ ((fmt "'a\nb'" 'cur))]}
 
 @deffmt[#:tag "compound-literal" "^'κ ...'"]{ 
 
-@literal["'κ ...'"] has the same form as above.
-The string must contain zero or more symbolic expressions.
-They are not evaluated.
-They are read at parsing time and added to the list of remaining data during
-execution of the format-procedure.
-The leftmost symbolic expression becomes the first next datum.
-In the symbolic expressions each single quote must be written as
-two immediately adjacent single quotes.}
+ @literal["'κ ...'"] has the same form as above.
+ The string must contain zero or more symbolic expressions.
+ They are not evaluated.
+ They are read at parsing time and added to the list of remaining data during
+ execution of the format-procedure.
+ The leftmost symbolic expression becomes the first next datum.
+ In the symbolic expressions each single quote must be written as
+ two immediately adjacent single quotes.}
 
 Because within a literal,
 two adjacent single quotes are read as one single quote being part of the literal,
 a separator is required between two adjacent literals when the second one is of the
 @elemref["simple-literal" "first form"].
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 @code{((fmt "R10'Article','Price'"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}@(linebreak)
 @code{((fmt "^'Article Price'R10 2D"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}@(linebreak)
 @code{((fmt "L2 ''''"))} → @code{"◦'"}@(linebreak)
@@ -530,7 +525,7 @@ In the results proper they are spaces, of course.}}}
 For example, the following raises an exception:
 
 @Interaction/no-prompt[
-(fmt "'Article" "Price'")]
+ (fmt "'Article" "Price'")]
 
 @subsection[#:tag "numerical"]{Numerical formats}
 
@@ -539,82 +534,79 @@ independent from the padding mode described @seclink["Padding" "elsewhere"] in t
 
 @deffmt[#:tag "I" "Iνμ"]{
 
-Instruction @code{I} is particularly useful for integer numbers,
-but nevertheless accepts every real number.
-It consumes and displays a real number rounded to an integer number.
-First the sign of the datum is determined.
-Subsequently the datum is rounded to an exact integer number.
-If rounding produces zero, the sign is retained.
-If a sign is to be written, it is placed immediately in front of the first decimal figure.
-Leading spaces are added if otherwise less than ν characters would be produced.
-In all cases the result contains at least μ decimal figures,
-padding with heading zeros when necessary,
-or at least one decimal figure if μ is zero.
-The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
-They are right justified in a field of at least ν characters. Examples: 
+ Instruction @code{I} is particularly useful for integer numbers,
+ but nevertheless accepts every real number.
+ It consumes and displays a real number rounded to an integer number.
+ First the sign of the datum is determined.
+ Subsequently the datum is rounded to an exact integer number.
+ If rounding produces zero, the sign is retained.
+ If a sign is to be written, it is placed immediately in front of the first decimal figure.
+ Leading spaces are added if otherwise less than ν characters would be produced.
+ In all cases the result contains at least μ decimal figures,
+ padding with heading zeros when necessary,
+ or at least one decimal figure if μ is zero.
+ The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
+ They are right justified in a field of at least ν characters. Examples: 
 
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
-@code{((fmt "*I3") 2 3.4 5.6)} → @code{"◦◦2◦◦3◦◦6"}@(linebreak)
-@code{((fmt "*I3.2") 2 3.4 5.6)} → @code{"◦02◦03◦06"}@(linebreak)
-@code{((fmt "I") 0.0)} → @code{"0"}@(linebreak)
-@code{((fmt "I") -0.0)} → @code{"-0"}@(linebreak)
-@code{((fmt "I") 1.0e-100000)} → @code{"0"}@(linebreak)
-@code{((fmt "I") -1.0e-100000)} → @code{"-0"}@(linebreak)
-@code{((fmt "I")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
-@code{((fmt "I") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
-@code{((fmt "I10") (/ 0.0 0.0))} → @code{"◦◦◦◦+nan.0"}@(linebreak)
-@code{(string-length ((fmt "I") #e1e100000))} → @code{100001}}
+ @space-note
+ @code{((fmt "*I3") 2 3.4 5.6)} → @code{"◦◦2◦◦3◦◦6"}@(linebreak)
+ @code{((fmt "*I3.2") 2 3.4 5.6)} → @code{"◦02◦03◦06"}@(linebreak)
+ @code{((fmt "I") 0.0)} → @code{"0"}@(linebreak)
+ @code{((fmt "I") -0.0)} → @code{"-0"}@(linebreak)
+ @code{((fmt "I") 1.0e-100000)} → @code{"0"}@(linebreak)
+ @code{((fmt "I") -1.0e-100000)} → @code{"-0"}@(linebreak)
+ @code{((fmt "I")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
+ @code{((fmt "I") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
+ @code{((fmt "I10") (/ 0.0 0.0))} → @code{"◦◦◦◦+nan.0"}@(linebreak)
+ @code{(string-length ((fmt "I") #e1e100000))} → @code{100001}}
 
 @deffmt[#:tag "F" "Fνμ"]{
 
-Consumes and displays a real number in decimal expansion:
-leading spaces, [sign], integer part, period, fraction of exactly μ decimal figures.
-The datum is rounded such as to fit the width of the fraction.
-If rounding yields zero, the sign is retained.
-The result has at least one decimal figure before the period.
-Leading spaces are added if otherwise less than ν characters would be produced.
-The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
-They are right justified in a field of at least ν characters. Examples: 
+ Consumes and displays a real number in decimal expansion:
+ leading spaces, [sign], integer part, period, fraction of exactly μ decimal figures.
+ The datum is rounded such as to fit the width of the fraction.
+ If rounding yields zero, the sign is retained.
+ The result has at least one decimal figure before the period.
+ Leading spaces are added if otherwise less than ν characters would be produced.
+ The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
+ They are right justified in a field of at least ν characters. Examples: 
 
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+ @space-note
 
-@code{((fmt "*F3  ") 2 3.4 5.6)} → @code{"◦2.◦3.◦6."}@(linebreak)
-@code{((fmt "*F5.2") 2 3.4 5.6)} → @code{"◦2.00◦3.40◦5.60"}@(linebreak)
-@code{((fmt "F.4") 2/3)} → @code{"0.6667"}@(linebreak)
-@code{((fmt "D") 2/3)} → @code{"2/3"}@(linebreak)
-@code{((fmt "F")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
-@code{((fmt "F") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
-@code{((fmt "F.2") -1.0e-100000)} → @code{"-0.00"}@(linebreak)
-@code{((fmt "F") (/ 0.0 0.0))} → @code{"+nan.0"}}
+ @code{((fmt "*F3  ") 2 3.4 5.6)} → @code{"◦2.◦3.◦6."}@(linebreak)
+ @code{((fmt "*F5.2") 2 3.4 5.6)} → @code{"◦2.00◦3.40◦5.60"}@(linebreak)
+ @code{((fmt "F.4") 2/3)} → @code{"0.6667"}@(linebreak)
+ @code{((fmt "D") 2/3)} → @code{"2/3"}@(linebreak)
+ @code{((fmt "F")  1.0e1000000)} → @code{"+inf.0"}@(linebreak)
+ @code{((fmt "F") -1.0e1000000)} → @code{"-inf.0"}@(linebreak)
+ @code{((fmt "F.2") -1.0e-100000)} → @code{"-0.00"}@(linebreak)
+ @code{((fmt "F") (/ 0.0 0.0))} → @code{"+nan.0"}}
 
 @deffmt[#:tag "E" "Eνμε"]{
 
-Consumes and displays a real number in scientific notation:
-leading blanks, [sign],
-one decimal figure,
-period,
-exactly μ decimal figures,
-letter @tt{e}, sign of exponent,
-ε or more decimal figures of exponent.
-If the number is not zero, the exponent is chosen such that there is exactly one
-non-zero decimal figure before the decimal point.
-If the number is zero, all decimal figures are zero.
-Leading spaces are added if otherwise less than ν characters would be produced.
-The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
-They are right justified in a field of at least ν characters. Examples:
+ Consumes and displays a real number in scientific notation:
+ leading blanks, [sign],
+ one decimal figure,
+ period,
+ exactly μ decimal figures,
+ letter @tt{e}, sign of exponent,
+ ε or more decimal figures of exponent.
+ If the number is not zero, the exponent is chosen such that there is exactly one
+ non-zero decimal figure before the decimal point.
+ If the number is zero, all decimal figures are zero.
+ Leading spaces are added if otherwise less than ν characters would be produced.
+ The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
+ They are right justified in a field of at least ν characters. Examples:
 
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
-@code{((fmt "*E10.3.2") 2/3 2.3e-2)} → @code{"◦6.667e-01◦2.300e-02"}@(linebreak)
-@code{((fmt "E.5") 2/3)} → @code{"6.66667e-1"}@(linebreak)
-@code{((fmt "E15.5.4") 2/3)} → @code{"◦◦6.66667e-0001"}@(linebreak)
-@code{((fmt "EXE") #e-1e+100000 -1.0e+100000)} → @code{"-1.e+100000◦-inf.0"}@(linebreak)
-@code{((fmt "EXE") #e-1e-100000 -1.0e-100000)} → @code{"-1.e-100000◦-0.e+0"}@(linebreak)
-@code{((fmt "E15 5 3") 0)} → @code{"◦◦◦0.00000e+000"} ; all decimal figures 0.@(linebreak)
-@code{((fmt "e5 5 3") -0.0)} → @code{"-0.00000e+000"}@(linebreak)
-@code{((fmt "E15 5 3") (/ 0.0 0.0))} → @code{"◦◦◦◦◦◦◦◦◦+nan.0"}}
+ @space-note
+ @code{((fmt "*E10.3.2") 2/3 2.3e-2)} → @code{"◦6.667e-01◦2.300e-02"}@(linebreak)
+ @code{((fmt "E.5") 2/3)} → @code{"6.66667e-1"}@(linebreak)
+ @code{((fmt "E15.5.4") 2/3)} → @code{"◦◦6.66667e-0001"}@(linebreak)
+ @code{((fmt "EXE") #e-1e+100000 -1.0e+100000)} → @code{"-1.e+100000◦-inf.0"}@(linebreak)
+ @code{((fmt "EXE") #e-1e-100000 -1.0e-100000)} → @code{"-1.e-100000◦-0.e+0"}@(linebreak)
+ @code{((fmt "E15 5 3") 0)} → @code{"◦◦◦0.00000e+000"} ; all decimal figures 0.@(linebreak)
+ @code{((fmt "e5 5 3") -0.0)} → @code{"-0.00000e+000"}@(linebreak)
+ @code{((fmt "E15 5 3") (/ 0.0 0.0))} → @code{"◦◦◦◦◦◦◦◦◦+nan.0"}}
 
 The numerical format-instructions
 @literal{B}, @literal{O}, @literal{H} and @literal{=}
@@ -623,27 +615,26 @@ are padded according to the current
 
 @deffmt[#:tag "B" "B"]{
 
-Displays a real number in binary notation.}
+ Displays a real number in binary notation.}
 
 @deffmt[#:tag "O" "O"]{
 
-Displays a real number in octal notation.}
+ Displays a real number in octal notation.}
 
 @deffmt[#:tag "H" "H"]{
 
-Displays a real number in hexadecimal notation.}
+ Displays a real number in hexadecimal notation.}
 
 @deffmt[#:tag "=" "="]{
 
-Displays a real number in decimal notation.}
+ Displays a real number in decimal notation.}
 
 @literal{B}, @literal{O}, @literal{H} and = convert the number to an exact one and
 use @racket[number->string] to convert the absolute value and
 display the result according to the current padding and sign mode.
 The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
 
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+@space-note
 
 @code{((fmt "H") 20/31)} → @code{"14/1f"}@(linebreak)
 @code{((fmt "D") 20/31)} → @code{"20/31"}@(linebreak)
@@ -683,13 +674,13 @@ this mode remains effective after return.
 Instruction @elemref["$" "$"] can be used to restore the previous sign mode.
 
 @deffmt["+"]{
-Switches sign mode on.}
+ Switches sign mode on.}
 @deffmt["-"]{
-Switches sign mode off.}
+ Switches sign mode off.}
 
 @deffmt[#:tag "$" "$ξ"]{
-Memorizes the current sign mode,
-executes instruction ξ and upon completion restores the memorized sign mode.}
+ Memorizes the current sign mode,
+ executes instruction ξ and upon completion restores the memorized sign mode.}
 
 @subsection{Tabulation}
 Tabulator instructions reposition the write head within or beyond the end of the current line.
@@ -711,31 +702,30 @@ reposition of the write head.
 
 @deffmt[#:tag "T" "Tν"]{
 
-Places the write head at position ν of the current line.}
+ Places the write head at position ν of the current line.}
 
 @deffmt[#:tag ">" ">ν"]{
 
-Positions the write head forward relative to the current position.}
+ Positions the write head forward relative to the current position.}
 
 @deffmt[#:tag "<" "<ν"]{
 
-Positions the write head backwards relative to the current position.
-An exception is raised when an attempt is made
-to position the write head before the start of the current line.}
+ Positions the write head backwards relative to the current position.
+ An exception is raised when an attempt is made
+ to position the write head before the start of the current line.}
 
 @deffmt[#:tag "&" "&"]{
 
-Positions the write head at the end of current line.}
+ Positions the write head at the end of current line.}
 
 @deffmt[#:tag "@" "@ξ"]{
 
-Memorizes the position of the start of the current line,
-executes instruction ξ and upon completion restores the memorized position.
-@red{Warning}:
-after restoring, new lines produced by ξ become part of the original current line.}
+ Memorizes the position of the start of the current line,
+ executes instruction ξ and upon completion restores the memorized position.
+ @red{Warning}:
+ after restoring, new lines produced by ξ become part of the original current line.}
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 
 @code{((fmt "T10 D T6 D T2 D &R4D") 1 2 3 4)} → @code{"◦◦3◦◦◦2◦◦◦1◦◦◦4"}@(linebreak)
 @code{((fmt "*(T#D)") 1 1 4 4 3 3 5 5 2 2 6 6 7 7 0 0)} → @code{"01234567"}
@@ -744,27 +734,26 @@ In the results proper they are spaces, of course.}}}
 
 @deffmt[#:tag "!" "!ξ"]{
 
-Executes instruction ξ only if there are more data.}
+ Executes instruction ξ only if there are more data.}
 
 @deffmt[#:tag "?" "?ξ"]{
 
-Executes instruction ξ only if there are no more data.}
+ Executes instruction ξ only if there are no more data.}
 
 @deffmt[#:tag "Q" "Qξξ"]{
 
-Requires one datum, but does not consume it.
-If the datum is true, the first instruction is executed, else the second one.}
+ Requires one datum, but does not consume it.
+ If the datum is true, the first instruction is executed, else the second one.}
 
 @deffmt[#:tag "sel" "{ξ ...+}"]{
 
-Requires and consumes a natural number.
-This number is used as index to select one instruction of @larger["ξ ..."],
-counting from 0. The other instructions are ignored.
-An exception is raised if the index is greater than or equal to
-the number of instructions in  @larger["ξ ..."].}
+ Requires and consumes a natural number.
+ This number is used as index to select one instruction of @larger["ξ ..."],
+ counting from 0. The other instructions are ignored.
+ An exception is raised if the index is greater than or equal to
+ the number of instructions in  @larger["ξ ..."].}
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 @code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}@(linebreak)
 @code{((fmt "!(*(D!X)/)"))} → @code{""}@(linebreak)
 @code{((fmt "*({'zero' 'one' 'two'}!x)") 2 1 0)} → @code{"two◦one◦zero"}@(linebreak)
@@ -775,14 +764,13 @@ In the results proper they are spaces, of course.}}}
 
 @deffmt["*ξ"]{
 
-Repeated execution of ξ until no data remain.}
+ Repeated execution of ξ until no data remain.}
 
 @deffmt[#:tag "νξ" "νξ"]{
 
-Instruction ξ is executed ν times.}
+ Instruction ξ is executed ν times.}
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 
 @code{((fmt "R3 4D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
 @code{((fmt "R3 *D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
@@ -790,15 +778,14 @@ In the results proper they are spaces, of course.}}}
 
 @deffmt[#:tag "_νμξξ" "_νμξξ" ]{
 
-Executes the first instruction ν times but after every μ times the second instruction is inserted.}
+ Executes the first instruction ν times but after every μ times the second instruction is inserted.}
 Examples:
 
 @scheme[((fmt "_9.3'a' 'b'"))] → @code{"aaabaaabaaab"}
 
 @scheme[((fmt "_8.3'a' 'b'"))] → @code{"aaabaaabaa"}
 
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+@space-note
 @scheme[((fmt 'current "U_#3(DX)/|'fin'") (list 1 2 3 4 5 6 7 8))] → void, displays:@linebreak[]
 @code{1◦2◦3◦}@linebreak[]
 @code{4◦5◦6◦}@linebreak[]
@@ -812,40 +799,39 @@ In the results proper they are spaces, of course.}}}
 @code{fin}
 
 @Interaction/no-prompt[
-(define v (for/list ((k (in-range 24))) (random)))
-((fmt 'current "u_#4f8.3/|d") v "output to follow")]
+ (define v (for/list ((k (in-range 24))) (random)))
+ ((fmt 'current "u_#4f8.3/|d") v "output to follow")]
 
 Mark the vertical bar following the slash.
 In the previous example it does not include an extra line-break before the output to
 follow. In the following example it does insert a line-break.
 
 @Interaction/no-prompt[
-(define v (for/list ((k (in-range 25))) (random)))
-((fmt 'current "u_#4f8.3/|d") v "output to follow")]
+ (define v (for/list ((k (in-range 25))) (random)))
+ ((fmt 'current "u_#4f8.3/|d") v "output to follow")]
 
 @subsection[#:tag "compound"]{Compound instructions}
 
 @deffmt[#:tag "simple-compound" "(ξ ...+)"]{
 
-Compound instruction. Useful for @seclink["condition" "conditions"],
-@seclink["iteration" "iterations"] and as argument of an instruction with one or more other
-instructions as arguments.}
+ Compound instruction. Useful for @seclink["condition" "conditions"],
+ @seclink["iteration" "iterations"] and as argument of an instruction with one or more other
+ instructions as arguments.}
 
 @deffmt[#:tag "special-compound" "[ξ ...+]"]{
 
-Special compound instruction.
-The output of the instructions is gathered in a string which
-after completion of the compound instruction is added to
-the remaining data and becomes the first next datum.
-Each special compound instruction has its own offset for the tabulator.
-The square brackets are part of the instruction.
-They do not indicate that ξ ... is optional.
-In fact the ellipsis makes ξ ... optional.
-[] produces an empty string.
-@red{Warning}: new lines produced by ξ ... become part of the original current line.}
+ Special compound instruction.
+ The output of the instructions is gathered in a string which
+ after completion of the compound instruction is added to
+ the remaining data and becomes the first next datum.
+ Each special compound instruction has its own offset for the tabulator.
+ The square brackets are part of the instruction.
+ They do not indicate that ξ ... is optional.
+ In fact the ellipsis makes ξ ... optional.
+ [] produces an empty string.
+ @red{Warning}: new lines produced by ξ ... become part of the original current line.}
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 
 @code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}@(linebreak)
 @code{((fmt "L3 [*D] C20 D") 1 2 3 4)} → @code{"◦◦◦◦◦1◦◦2◦◦3◦◦4◦◦◦◦◦"}@(linebreak)
@@ -855,70 +841,69 @@ In the results proper they are spaces, of course.}}}
 
 @deffmt[#:tag "M" "Mξ"]{
 
-Memorizes the current padding mode, field width, tabulator offset and sign mode,
-executes the instruction and restores the memorized state.
-@red{Warning}: new lines produced by ξ become part of the original current line.}
+ Memorizes the current padding mode, field width, tabulator offset and sign mode,
+ executes the instruction and restores the memorized state.
+ @red{Warning}: new lines produced by ξ become part of the original current line.}
 
 @deffmt[#:tag ":" ":"]{
 
-Exits from @seclink["compound" "a compound instruction"]
-or from a format-procedure or format-string called with instruction @elemref["K" "K"].
-At top level same as instruction @bold{;}.}
+ Exits from @seclink["compound" "a compound instruction"]
+ or from a format-procedure or format-string called with instruction @elemref["K" "K"].
+ At top level same as instruction @bold{;}.}
 
 @deffmt[#:tag ";" ";"]{
 
-Exits from the top level format-procedure.}
+ Exits from the top level format-procedure.}
 
 @deffmt[#:tag "S" "S"]{
 
-Skips one datum.}
+ Skips one datum.}
 
 @deffmt["~"]{
 
-Positions the write head at the end of the current line and
-writes all remaining data separated by spaces and terminated by a newline.
-Same as @code{"!(&n*(w!x)/)"}.
-Usually it is wise to write @code{"&x~"} or @code{"&|~"}
-in order to separate the remaining output from output already produced
-and to avoid writing over already generated output.}
+ Positions the write head at the end of the current line and
+ writes all remaining data separated by spaces and terminated by a newline.
+ Same as @code{"!(&n*(w!x)/)"}.
+ Usually it is wise to write @code{"&x~"} or @code{"&|~"}
+ in order to separate the remaining output from output already produced
+ and to avoid writing over already generated output.}
 
 @deffmt[#:tag "J" "J"]{
 
-No operation.}
+ No operation.}
 
 @deffmt[#:tag "G" "G"]{
 
-Consumes a datum which must be a natural number(exact-nonnegative-integer) or @code{#f}.
-It is supposed to be a time measured in seconds from the platform specific starting time.
-@code{#f} is for the current time.
-The time is displayed as: @literal["DDD,◦dd◦MMM◦yyyy◦hh:mm:ss◦±hhmm"],
-exactly 31 characters.
-Instruction G limits the argument to less than 2@superscript{32}.}
+ Consumes a datum which must be a natural number(exact-nonnegative-integer) or @code{#f}.
+ It is supposed to be a time measured in seconds from the platform specific starting time.
+ @code{#f} is for the current time.
+ The time is displayed as: @literal["DDD,◦dd◦MMM◦yyyy◦hh:mm:ss◦±hhmm"],
+ exactly 31 characters.
+ Instruction G limits the argument to less than 2@superscript{32}.}
 
 @tabular[
  #:sep @hspace[1]
  (list
-  (list @code["DDD"]
-        "First three letters of the name of the day of the week.")
-  (list @code["dd"]
-        "Two decimal figures for the number of the day of the month.")
-  (list @code["MMM"]
-        "First three letters of the name of the month.")
-  (list @code["yyyy"]
-        "Four decimal figures of the year")
-  (list @code["hh"]
-        "Two decimal figures for the hour of the day on 24 hour basis.")
-  (list @code["mm"]
-        "Two decimal figures for the minute within the hour.")
-  (list @code["ss"]
-        "Two decimal figures for the second within the minute (leap second included)")
-  (list @code["±hhmm"]
-        "Time zone, hours and minutes, sign followed by four decimal figures."))]
+   (list @code["DDD"]
+     "First three letters of the name of the day of the week.")
+   (list @code["dd"]
+     "Two decimal figures for the number of the day of the month.")
+   (list @code["MMM"]
+     "First three letters of the name of the month.")
+   (list @code["yyyy"]
+     "Four decimal figures of the year")
+   (list @code["hh"]
+     "Two decimal figures for the hour of the day on 24 hour basis.")
+   (list @code["mm"]
+     "Two decimal figures for the minute within the hour.")
+   (list @code["ss"]
+     "Two decimal figures for the second within the minute (leap second included)")
+   (list @code["±hhmm"]
+     "Time zone, hours and minutes, sign followed by four decimal figures."))]
 
 Examples (assuming Windows XP or Windows 7 in time zone +0100)
 
-@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+@space-note
 
 @code{((fmt "G") 0)} → @code{"Thu,◦01◦Jan◦1970◦01:00:00◦+0100"}@(linebreak)
 @code{((fmt "^'0' G"))}  Same as: @code{((fmt "G") 0)}@(linebreak)
@@ -929,7 +914,7 @@ In the results proper they are spaces, of course.}}}
 The following produces an exception:
 
 @Interaction[
-((fmt "G") (expt 2 32))]
+ ((fmt "G") (expt 2 32))]
 
 @subsection[#:tag "unfolding"]{Unfolding}
 
@@ -950,82 +935,81 @@ An element that causes a cycle is not unfolded.
 
 @deffmt[#:tag "U" "U"]{
 
-Consumes a datum and unfolds it. Examples: 
+ Consumes a datum and unfolds it. Examples: 
 
-@scheme[((fmt "U~") '())] → @code{"0\n"}@(linebreak)
-@scheme[((fmt "U~") '(a b c))] → @code{"3 a b c\n"}@(linebreak)
-@scheme[((fmt "U~") '(() () ()))] → @code{"3 () () ()\n"}@(linebreak)
-@scheme[((fmt "U~") '(a b . c))] → @code{"3 a b c\n"}@(linebreak)
-@scheme[((fmt "U~") '((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}@(linebreak)
-@scheme[((fmt "U~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
-@scheme[((fmt "U~") #((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}
+ @scheme[((fmt "U~") '())] → @code{"0\n"}@(linebreak)
+ @scheme[((fmt "U~") '(a b c))] → @code{"3 a b c\n"}@(linebreak)
+ @scheme[((fmt "U~") '(() () ()))] → @code{"3 () () ()\n"}@(linebreak)
+ @scheme[((fmt "U~") '(a b . c))] → @code{"3 a b c\n"}@(linebreak)
+ @scheme[((fmt "U~") '((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}@(linebreak)
+ @scheme[((fmt "U~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
+ @scheme[((fmt "U~") #((a b c) (d e f) (g h i)))] → @code{"3 (a b c) (d e f) (g h i)\n"}
 
-@Interaction/no-prompt[
-(code:comment @#,t{Pad individual elements of a list.})
-(code:comment @#,t{L3 : left allignment in fields of 3 characters.})
-(code:comment @#,t{U#D : unfold and display each element.})
-(define a '("   a    " "    b" "c    "))
-((fmt "L3U#D") a)]
+ @Interaction/no-prompt[
+ (code:comment @#,t{Pad individual elements of a list.})
+ (code:comment @#,t{L3 : left allignment in fields of 3 characters.})
+ (code:comment @#,t{U#D : unfold and display each element.})
+ (define a '("   a    " "    b" "c    "))
+ ((fmt "L3U#D") a)]
 
-@Interaction/no-prompt[
-(define p (mcons 'a 'b))
-(set-mcdr! p p)
-((fmt "U~") p)]
+ @Interaction/no-prompt[
+ (define p (mcons 'a 'b))
+ (set-mcdr! p p)
+ ((fmt "U~") p)]
 
-@Interaction/no-prompt[
-(define v (vector 1 2))
-(vector-set! v 1 v)
-((fmt "US~") v)]}
+ @Interaction/no-prompt[
+ (define v (vector 1 2))
+ (vector-set! v 1 v)
+ ((fmt "US~") v)]}
 
 @deffmt[#:tag "V" "V"]{
 
-Consumes and recursively unfolds the next datum in depth first order. Examples:
+ Consumes and recursively unfolds the next datum in depth first order. Examples:
 
-@scheme[((fmt "V~") '())] → @code{"0\n"}@(linebreak)
-@scheme[((fmt "V~") '(a b c))] → @code{"3 a b c\n"}@(linebreak)
-@scheme[((fmt "V~") '(() () ()))] → @code{"0\n"}@(linebreak)
-@scheme[((fmt "V~") '(a b . c))] → @code{"3 a b c\n"}@(linebreak)
-@scheme[((fmt "V~") '((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}@(linebreak)
-@scheme[((fmt "V~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
-@scheme[((fmt "V~") #((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}
+ @scheme[((fmt "V~") '())] → @code{"0\n"}@(linebreak)
+ @scheme[((fmt "V~") '(a b c))] → @code{"3 a b c\n"}@(linebreak)
+ @scheme[((fmt "V~") '(() () ()))] → @code{"0\n"}@(linebreak)
+ @scheme[((fmt "V~") '(a b . c))] → @code{"3 a b c\n"}@(linebreak)
+ @scheme[((fmt "V~") '((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}@(linebreak)
+ @scheme[((fmt "V~") #(a b c))] → @code{"3 a b c\n"}@(linebreak)
+ @scheme[((fmt "V~") #((a b c) (d e f) (g h i)))] → @code{"9 a b c d e f g h i\n"}
 
-@Interaction[
-(define v (vector 'a 'b 'c))
-(vector-set! v 1 v)
-((fmt "V~") v)]
-because the second element (index 1) causes a cycle.}
+ @Interaction[
+ (define v (vector 'a 'b 'c))
+ (vector-set! v 1 v)
+ ((fmt "V~") v)]
+ because the second element (index 1) causes a cycle.}
 
 @deffmt[#:tag "Z" "Z"]{
 
-Consumes all remaining data and recursively unfolds the list of these data.}
+ Consumes all remaining data and recursively unfolds the list of these data.}
 
 @deffmt[#:tag "Y" "Y"]{
 
-Consumes a datum, which must be a number.
-It is decomposed into its real and imaginary part.
-These are consed as two real numbers to the remaining data,
-the real part becoming the first next datum, the imaginary part the second one.}
+ Consumes a datum, which must be a number.
+ It is decomposed into its real and imaginary part.
+ These are consed as two real numbers to the remaining data,
+ the real part becoming the first next datum, the imaginary part the second one.}
 
 @deffmt[#:tag "%" "%"]{
 
-Consumes a datum, which must be a rational number.
-In Racket all real numbers, @code{+nan.0}, @code{+inf.0} or @code{-inf.0} excluded,
-are rational too.
-The number is decomposed into its numerator and denominator.
-These are consed as two exact integer numbers to the remaining data,
-the numerator becoming the first next datum, the denominator the second one.
-The sign is associated with the numerator, the denominator always being positive.
-Zero, @code{+0.0} and @code{-0.0} included, are treated as @code{0}.}
+ Consumes a datum, which must be a rational number.
+ In Racket all real numbers, @code{+nan.0}, @code{+inf.0} or @code{-inf.0} excluded,
+ are rational too.
+ The number is decomposed into its numerator and denominator.
+ These are consed as two exact integer numbers to the remaining data,
+ the numerator becoming the first next datum, the denominator the second one.
+ The sign is associated with the numerator, the denominator always being positive.
+ Zero, @code{+0.0} and @code{-0.0} included, are treated as @code{0}.}
 
 @deffmt["\\"]{
 
-A single back-slash, but within a string an escaping back-slash is required.
-Consumes a datum, which must be a number.
-The number is consumed and its @code{magnitude} and @code{angle} are added to the remaining data.
-The magnitude and angle of exact zero are zero.}
+ A single back-slash, but within a string an escaping back-slash is required.
+ Consumes a datum, which must be a number.
+ The number is consumed and its @code{magnitude} and @code{angle} are added to the remaining data.
+ The magnitude and angle of exact zero are zero.}
 
-Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-In the results proper they are spaces, of course.}}}
+Examples: @space-note
 
 @code{((fmt "U#(DX)") '(a b c d))} → @code{"a◦b◦c◦d◦"}@(linebreak)
 @code{((fmt "U*(DX)") '(a b c d))} → @code{"4◦a◦b◦c◦d◦"}@(linebreak)
@@ -1046,43 +1030,44 @@ displays:
 where @code{18014398509481984} = @code{(expt 2 54)}.
 
 @Interaction/no-prompt[
-((fmt "\\dxd") 0)
-((fmt "\\dxd") 0.0)]
+ ((fmt "\\dxd") 0)
+ ((fmt "\\dxd") 0.0)
+ ((fmt "\\dxd") -0.0)]
 
 @subsection{Procedure calls}
 
 @deffmt[ "λ"]{
 
-Consumes the next datum, which must be a procedure.
-The procedure must accept one argument,
-for which it receives the list of remaining data.
-It must return a list. This list replaces the list of remaining data.
+ Consumes the next datum, which must be a procedure.
+ The procedure must accept one argument,
+ for which it receives the list of remaining data.
+ It must return a list. This list replaces the list of remaining data.
 
-The procedure is called with a continuation barrier.
-This prohibits re-entry by means of a continuation in the body of the procedure.
-Allowing re-entrance could lead to unexpected results
-when the called procedure returns a second time after the state of the format-procedure has been
-altered or the format-procedure already has finished.
+ The procedure is called with a continuation barrier.
+ This prohibits re-entry by means of a continuation in the body of the procedure.
+ Allowing re-entrance could lead to unexpected results
+ when the called procedure returns a second time after the state of the format-procedure has been
+ altered or the format-procedure already has finished.
 
-The called procedure may alter parameters.
-If the @italic{@code{port}} or @italic{@code{port-arg}}-argument of the format-procedure is
-@racket['current] or @racket['cur] and
-the procedure alters parameter @racket[current-output-port],
-the format-procedure sticks to the output-port as was found in this parameter
-before the alteration.}
+ The called procedure may alter parameters.
+ If the @italic{@code{port}} or @italic{@code{port-arg}}-argument of the format-procedure is
+ @racket['current] or @racket['cur] and
+ the procedure alters parameter @racket[current-output-port],
+ the format-procedure sticks to the output-port as was found in this parameter
+ before the alteration.}
 
 @deffmt[#:tag "K" "K"]{
 
-Consumes the next datum, which must be a format-procedure or a format-string.
-If a format-string is given, it is checked and translated,
-but repeated parsing and translation is avoided.
-See section @seclink["avoid" "Repeated parsing and translation avoided"].
-If a format-procedure is given, its port is ignored.
-The instructions are executed as part of the calling format-procedure.
-The called format-procedure inherits the padding mode, tabulator and sign mode from the caller.
-If it alters the state, the alterations remain effective after return.
-Instructions @elemref["A" "A"], @elemref["@" "@"], @elemref["$" "$"] and @elemref["M" "M"]
-can be used to preserve the padding mode, tabulator offset and sign mode.}
+ Consumes the next datum, which must be a format-procedure or a format-string.
+ If a format-string is given, it is checked and translated,
+ but repeated parsing and translation is avoided.
+ See section @seclink["avoid" "Repeated parsing and translation avoided"].
+ If a format-procedure is given, its port is ignored.
+ The instructions are executed as part of the calling format-procedure.
+ The called format-procedure inherits the padding mode, tabulator and sign mode from the caller.
+ If it alters the state, the alterations remain effective after return.
+ Instructions @elemref["A" "A"], @elemref["@" "@"], @elemref["$" "$"] and @elemref["M" "M"]
+ can be used to preserve the padding mode, tabulator offset and sign mode.}
 
 @section{Reuse of format-procedures}
 
@@ -1109,35 +1094,35 @@ The purpose of the procedure is to display a detailed bill.
 
 @racketblock[
  (define print-bill
-  (let
-   ((line "N40('-')/")
-    (headers "R10'article','number','price pp','total'/")
-    (data "R10U#(USUS2D2F10.2/)")
-    (code:comment @#,t{"US" means: unfold and skip element count})
-    (grand-total "R30'grand total'F10.2/"))
    (let
-    ((fmt-proc
-      (fmt "/" line headers line data line grand-total line 'current)))
-    (lambda (table)
-     (let*
-      ((totals (map (λ (x) (* (cadr x) (caddr x))) table))
-       (grand-total (apply + totals)))
-      (fmt-proc (map list table totals) grand-total))))))
+       ((line "N40('-')/")
+        (headers "R10'article','number','price pp','total'/")
+        (data "R10U#(USUS2D2F10.2/)")
+        (code:comment @#,t{"US" means: unfold and skip element count})
+        (grand-total "R30'grand total'F10.2/"))
+     (let
+         ((fmt-proc
+            (fmt "/" line headers line data line grand-total line 'current)))
+       (lambda (table)
+         (let*
+             ((totals (map (λ (x) (* (cadr x) (caddr x))) table))
+              (grand-total (apply + totals)))
+           (fmt-proc (map list table totals) grand-total))))))
  
  (print-bill '((chair 4 50) (table 1 100) (pillow 4 10)))]
 
 → void and displays:
 
 @verbatim{
-----------------------------------------
-   article    number  price pp     total
-----------------------------------------
-     chair         4     50.00    200.00
-     table         1    100.00    100.00
-    pillow         4     10.00     40.00
-----------------------------------------
-                   grand total    340.00
-----------------------------------------}
+ ----------------------------------------
+ article    number  price pp     total
+ ----------------------------------------
+ chair         4     50.00    200.00
+ table         1    100.00    100.00
+ pillow         4     10.00     40.00
+ ----------------------------------------
+ grand total    340.00
+ ----------------------------------------}
 
 @subsection{Triangle of Pascal}
 
@@ -1146,23 +1131,23 @@ with its base at the bottom and all other lines centred above the bottom line.
 
 @racketblock[
  (define binomials
-  (let
-   ((fmt-row (fmt "R5 D US C4 [*D] C45 D"))
-    (fmt-table (fmt "/U#(D/)" 'current)))
-   (define (make-next-row order prev-row)
-    (list->vector
-     (cons 1
-      (let loop ((j 1))
-       (if (> j order) '(1)
-        (cons
-          (+ (vector-ref prev-row (sub1 j)) (vector-ref prev-row j))
-          (loop (add1 j))))))))
-   (lambda (n)
-    (fmt-table
-     (let loop ((order 0) (row #1(1)))
-      (cons (fmt-row order row)
-       (if (>= order n)  '( )
-        (loop (add1 order) (make-next-row order row)))))))))
+   (let
+       ((fmt-row (fmt "R5 D US C4 [*D] C45 D"))
+        (fmt-table (fmt "/U#(D/)" 'current)))
+     (define (make-next-row order prev-row)
+       (list->vector
+         (cons 1
+           (let loop ((j 1))
+             (if (> j order) '(1)
+               (cons
+                 (+ (vector-ref prev-row (sub1 j)) (vector-ref prev-row j))
+                 (loop (add1 j))))))))
+     (lambda (n)
+       (fmt-table
+         (let loop ((order 0) (row #1(1)))
+           (cons (fmt-row order row)
+             (if (>= order n)  '( )
+               (loop (add1 order) (make-next-row order row)))))))))
  
  (binomials 9)]
 
@@ -1185,57 +1170,57 @@ with its base at the bottom and all other lines centred above the bottom line.
 @tabular[
  #:sep @hspace[3]
  (list
-  (list @elemref["A"]{A} "Preserve padding")
-  (list @elemref["B"]{B} "Binary numerical format")
-  (list @elemref["C"]{C} "Centred padding")
-  (list @elemref["D"]{D} "Display")
-  (list @elemref["E"]{E} "Scientific numerical format")
-  (list @elemref["F"]{F} "Decimal expansion numerical format")
-  (list @elemref["G"]{G} "Date and time")
-  (list @elemref["H"]{H} "Hexadecimal numerical format")
-  (list @elemref["I"]{I} "Integer numerical format")
-  (list @elemref["J"]{J} "No operation")
-  (list @elemref["K"]{K} "Call fmt-procedure or format-string")
-  (list @elemref["L"]{L} "Left padding")
-  (list @elemref["M"]{M} "Preserve state (padding, sign-mode and tabulator)")
-  (list @elemref["N"]{N} "No padding")
-  (list @elemref["O"]{O} "Octal numerical format")
-  (list @elemref["P"]{P} "Print")
-  (list @elemref["Q"]{Q} "Conditional")
-  (list @elemref["R"]{R} "Right padding")
-  (list @elemref["S"]{S} "Skip")
-  (list @elemref["T"]{T} "Tabulator")
-  (list @elemref["U"]{U} "Unfold")
-  (list @elemref["V"]{V} "Unfold recursively")
-  (list @elemref["W"]{W} "Write")
-  (list @elemref["X"]{X} "Space")
-  (list @elemref["Y"]{Y} "Decompose complex number")
-  (list @elemref["Z"]{Z} "Unfold recursively")
-  (list @elemref["="]{=} "Decimal numerical format")
-  (list @elemref["simple-compound"]{(...)} "compound instruction")
-  (list @elemref["special-compound"]{[...]} "compound instruction")
-  (list @elemref["simple-literal"]{'κ ...'} "Literal data")
-  (list @elemref["compound-literal"]{^'κ ...'} "Literal data")
-  (list @elemref["%"]{%} "Decompose in numerator and denominator")
-  (list @elemref["\\"]{\} "Decompose in magnitude and angle")
-  (list @elemref["/"]{/} "Newline")
-  (list @elemref["|"]{|} "Newline but not double")
-  (list @elemref["~"]{~} "Display all remaining data")
-  (list @elemref["*ξ"]{*ξ} "Repeat until no more data")
-  (list @elemref["νξ"]{νξ} "Repeat ν times")
-  (list @elemref["!"]{!} "When more data left")
-  (list @elemref["?"]{?} "Unless more data left")
-  (list @elemref["+"]{+} "Sign mode on")
-  (list @elemref["-"]{-} "Sign mode off")
-  (list @elemref["$"]{$} "Preserve sign mode")
-  (list @elemref[":"]{:} "Local exit")
-  (list @elemref[";"]{;} "Top level exit")
-  (list @elemref["&"]{&} "Tabulate to end of line")
-  (list @elemref["@" "@"] "Preserve tabulator")
-  (list @elemref["<"]{<} "Relative tab backward")
-  (list @elemref[">"]{>} "Relative tab forward")
-  (list @elemref["_νμξξ"]{_νμξξ} "Iteration")
-  (list @elemref["λ"]{λ} "Call procedure")
-  (list @elemref["sel"]{@tt["{ξ...}"]} "Instruction selector"))]
+   (list @elemref["A"]{A} "Preserve padding")
+   (list @elemref["B"]{B} "Binary numerical format")
+   (list @elemref["C"]{C} "Centred padding")
+   (list @elemref["D"]{D} "Display")
+   (list @elemref["E"]{E} "Scientific numerical format")
+   (list @elemref["F"]{F} "Decimal expansion numerical format")
+   (list @elemref["G"]{G} "Date and time")
+   (list @elemref["H"]{H} "Hexadecimal numerical format")
+   (list @elemref["I"]{I} "Integer numerical format")
+   (list @elemref["J"]{J} "No operation")
+   (list @elemref["K"]{K} "Call fmt-procedure or format-string")
+   (list @elemref["L"]{L} "Left padding")
+   (list @elemref["M"]{M} "Preserve state (padding, sign-mode and tabulator)")
+   (list @elemref["N"]{N} "No padding")
+   (list @elemref["O"]{O} "Octal numerical format")
+   (list @elemref["P"]{P} "Print")
+   (list @elemref["Q"]{Q} "Conditional")
+   (list @elemref["R"]{R} "Right padding")
+   (list @elemref["S"]{S} "Skip")
+   (list @elemref["T"]{T} "Tabulator")
+   (list @elemref["U"]{U} "Unfold")
+   (list @elemref["V"]{V} "Unfold recursively")
+   (list @elemref["W"]{W} "Write")
+   (list @elemref["X"]{X} "Space")
+   (list @elemref["Y"]{Y} "Decompose complex number")
+   (list @elemref["Z"]{Z} "Unfold recursively")
+   (list @elemref["="]{=} "Decimal numerical format")
+   (list @elemref["simple-compound"]{(...)} "compound instruction")
+   (list @elemref["special-compound"]{[...]} "compound instruction")
+   (list @elemref["simple-literal"]{'κ ...'} "Literal data")
+   (list @elemref["compound-literal"]{^'κ ...'} "Literal data")
+   (list @elemref["%"]{%} "Decompose in numerator and denominator")
+   (list @elemref["\\"]{\} "Decompose in magnitude and angle")
+   (list @elemref["/"]{/} "Newline")
+   (list @elemref["|"]{|} "Newline but not double")
+   (list @elemref["~"]{~} "Display all remaining data")
+   (list @elemref["*ξ"]{*ξ} "Repeat until no more data")
+   (list @elemref["νξ"]{νξ} "Repeat ν times")
+   (list @elemref["!"]{!} "When more data left")
+   (list @elemref["?"]{?} "Unless more data left")
+   (list @elemref["+"]{+} "Sign mode on")
+   (list @elemref["-"]{-} "Sign mode off")
+   (list @elemref["$"]{$} "Preserve sign mode")
+   (list @elemref[":"]{:} "Local exit")
+   (list @elemref[";"]{;} "Top level exit")
+   (list @elemref["&"]{&} "Tabulate to end of line")
+   (list @elemref["@" "@"] "Preserve tabulator")
+   (list @elemref["<"]{<} "Relative tab backward")
+   (list @elemref[">"]{>} "Relative tab forward")
+   (list @elemref["_νμξξ"]{_νμξξ} "Iteration")
+   (list @elemref["λ"]{λ} "Call procedure")
+   (list @elemref["sel"]{@tt["{ξ...}"]} "Instruction selector"))]
 
 @larger{@larger{@@bold{The end}}}
