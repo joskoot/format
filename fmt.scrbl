@@ -1114,15 +1114,15 @@ The purpose of the procedure is to display a detailed bill.
 → void and displays:
 
 @verbatim{
- ----------------------------------------
- article    number  price pp     total
- ----------------------------------------
- chair         4     50.00    200.00
- table         1    100.00    100.00
- pillow         4     10.00     40.00
- ----------------------------------------
- grand total    340.00
- ----------------------------------------}
+----------------------------------------
+   article    number  price pp     total
+----------------------------------------
+     chair         4     50.00    200.00
+     table         1    100.00    100.00
+    pillow         4     10.00     40.00
+----------------------------------------
+                   grand total    340.00
+----------------------------------------}
 
 @subsection{Triangle of Pascal}
 
