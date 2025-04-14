@@ -1,7 +1,7 @@
 A simple formatter.
 Example:
 #lang racket
-(require "fmt/fmt")
+(require "format/fmt")
 (define my-fmt (fmt "*i3" 'current))
 (my-fmt 1 2 3)
 Prints:
