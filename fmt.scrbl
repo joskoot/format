@@ -729,6 +729,7 @@ Examples: @space-note
 
 @code{((fmt "T10 D T6 D T2 D &R4D") 1 2 3 4)} → @code{"◦◦3◦◦◦2◦◦◦1◦◦◦4"}@(linebreak)
 @code{((fmt "*(T#D)") 1 1 4 4 3 3 5 5 2 2 6 6 7 7 0 0)} → @code{"01234567"}
+@code{((fmt "'a'>3'b'<3'c'"))} → @code{"a◦c◦b"}
 
 @subsection[#:tag "condition" "Conditional instructions"]
 
