@@ -521,7 +521,7 @@
     (file-position p nn))
    (else
     (file-position p len)
-    (display (make-string (- n len) #\space) p)))))
+    (display (make-string (- nn len) #\space) p)))))
 
 ;---------------------------------------------------------------------------------------------------
 ; Section 3h
