@@ -838,6 +838,13 @@ Examples: @space-note
 @code{((fmt "L3 [*D] C20 D") 1 2 3 4)} → @code{"◦◦◦◦◦1◦◦2◦◦3◦◦4◦◦◦◦◦"}@(linebreak)
 @code{((fmt "['123'/'456'] D T3 '|'"))} → @code{"123|456"}
 
+An opening parenthesis, square bracket or curly brace can be balanced by a closing parenthesis,
+square bracket or curly brace in a @italic{@tt{format}}-argument yet to follow:
+
+@code{((fmt "*({'zero'" "'one'" "'two'" "}!x)") 2 1 0)} → @code{"two one zero"}@(linebreak)
+@(hspace 3)does the same as:@(linebreak)
+@code{((fmt "*({'zero' 'one' 'two'}!x)") 2 1 0)} → @code{"two one zero"}
+
 @subsection{Miscellaneous instructions}
 
 @deffmt[#:tag "M" "Mξ"]{
