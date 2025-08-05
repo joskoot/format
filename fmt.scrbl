@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require scribble/eval scribble/core (for-label "fmt.rkt" racket) racket)
 
-@title{A simple formatter for Racket}
+@title{A simple formatter}
 @author{Jacob J. A. Koot}
 @(defmodule format/fmt #:packages ())
 @;@(defmodule "fmt.rkt" #:packages ())
