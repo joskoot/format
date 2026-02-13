@@ -4,7 +4,7 @@ Example:
 
 #lang racket
 (require "format/fmt")
-(define my-fmt (fmt "*i3" 'current))
+(define my-fmt (fmt "*i3" 'current)) 
 (my-fmt 1 2 3)
 
 Prints:
