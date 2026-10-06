@@ -1,7 +1,7 @@
 #lang scribble/manual
 @(require scribble/eval scribble/core (for-label "fmt.rkt" racket) racket)
 
-@title{A simple formatter}
+@title{A simple formatter for Racket}
 @author{Jacob J. A. Koot}
 @(defmodule format/fmt #:packages ())
 @;@(defmodule "fmt.rkt" #:packages ())
@@ -56,7 +56,11 @@ importance, but not to the extent that a highly finished presentation is require
 is procedure @racket[format].
 It is a handy tool, @nonbreaking{but in some} cases may not provide enough functionality.
 Module
-@seclink["format" #:doc '(lib "scribblings/reference/reference.scrbl")]{racket/format}
+@(hyperlink
+   (string-append
+     "https://docs.racket-lang.org/reference/strings.html?q=racket%2Fformat#%28mod-path._"
+     "racket%2Fformat%29")
+   "racket/format")
 provides elaborated padding and several numerical formats,
 but is somewhat verbose when the details are to be specified.
 Which functions and shape a simple formatter should have
@@ -100,7 +104,8 @@ because the produced output is gathered in a string before being committed to th
  Procedure @racket[fmt] returns a procedure, in particular a format-procedure,
  satisfying predicate @racket[fmt?] which implies satisfying predicate @racket[procedure?].
 
- The optional @racket[port]-argument can be placed at arbitrary position before,
+ The @racket[port]-argument passed to procedure @racket[fmt]
+ can be placed at arbitrary position before,
  among or after the @racket[format]-arguments.
  The symbols @racket['string], @racket['current] and @racket['argument] can be abbreviated as
  @racket['str], @racket['cur] and @racket['arg].
@@ -170,8 +175,8 @@ Format-procedures are called as follows:
 Examples:
 @margin-note{@element["sroman"]{@smaller{In these examples instruction @elemref["I" "I5"]
    is given exact integer numbers
-   and displays them right justified in fields of 5 characters.@(linebreak)
-   In the results `◦´ is used to show spaces.@(linebreak)
+   and displays them right justified in fields of 5 characters.
+   In the results `◦´ is used to show spaces.
    In the results proper they are spaces, of course.}}}
 @racket[((fmt "I5") 12)] → @code{"◦◦◦12"}@(linebreak)
 @racket[((fmt "I5" 'string) 12)] → @code{"◦◦◦12"}@(linebreak)
@@ -364,11 +369,8 @@ A period without immediately preceding decimal figure is\ninterpreted as zero.")
  @nonbreaking{@racket[exact-nonnegative-integer?]}
  "). This number is used as numerical argument or repetition count."]))]
 
-@(define space-note
-   @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
-   In the results proper they are spaces, of course.}}})
-
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "I5") 12)} → @code{"◦◦◦12"} integer format, field width 5.@(linebreak)
 @code{((fmt "I5.3") 12)} → @code{"◦◦012"} integer format, field width 5, at least 3 decimal figures.
@@ -416,7 +418,8 @@ See @seclink["Tabulation" "tabulation"].
 
  Executes a newline instruction only if not at the start of the current line.}
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 @code{((fmt 'current "DXDXD")   "Jacob" 3 #\x)} → void, displays @code{Jacob◦3◦x}@(linebreak)
 @code{((fmt 'current "WXWXW")   "Jacob" 3 #\x)} → void, displays @code{"Jacob"◦3◦#\x}@(linebreak)
 @code{((fmt 'current "D") (list "Jacob" 3 #\x))} → void, displays @code{(Jacob◦3◦x)}@(linebreak)
@@ -474,7 +477,8 @@ it is useful only with a font of fixed character width.
  Memorizes the current padding mode and field width,
  executes instruction ξ and upon completion restores the memorized padding mode and field width.
 
- Examples: @space-note
+ Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+    In the results proper they are spaces, of course.}}}
  @code{((fmt "L5*D") 1 2 3)} → @code{"1◦◦◦◦2◦◦◦◦3◦◦◦◦"}@(linebreak)
  @code{((fmt "R5*D") 1 2 3)} → @code{"◦◦◦◦1◦◦◦◦2◦◦◦◦3"}@(linebreak)
  @code{((fmt "C5*D") 1 2 3)} → @code{"◦◦1◦◦◦◦2◦◦◦◦3◦◦"}@(linebreak)
@@ -512,7 +516,8 @@ two adjacent single quotes are read as one single quote being part of the litera
 a separator is required between two adjacent literals when the second one is of the
 @elemref["simple-literal" "first form"].
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 @code{((fmt "R10'Article','Price'"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}@(linebreak)
 @code{((fmt "^'Article Price'R10 2D"))} → @code{"◦◦◦Article◦◦◦◦◦Price"}@(linebreak)
 @code{((fmt "L2 ''''"))} → @code{"◦'"}@(linebreak)
@@ -548,7 +553,8 @@ independent from the padding mode described @seclink["Padding" "elsewhere"] in t
  The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
  They are right justified in a field of at least ν characters. Examples: 
 
- @space-note
+ @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+    In the results proper they are spaces, of course.}}}
  @code{((fmt "*I3") 2 3.4 5.6)} → @code{"◦◦2◦◦3◦◦6"}@(linebreak)
  @code{((fmt "*I3.2") 2 3.4 5.6)} → @code{"◦02◦03◦06"}@(linebreak)
  @code{((fmt "I") 0.0)} → @code{"0"}@(linebreak)
@@ -571,7 +577,8 @@ independent from the padding mode described @seclink["Padding" "elsewhere"] in t
  The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
  They are right justified in a field of at least ν characters. Examples: 
 
- @space-note
+ @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+    In the results proper they are spaces, of course.}}}
 
  @code{((fmt "*F3  ") 2 3.4 5.6)} → @code{"◦2.◦3.◦6."}@(linebreak)
  @code{((fmt "*F5.2") 2 3.4 5.6)} → @code{"◦2.00◦3.40◦5.60"}@(linebreak)
@@ -598,7 +605,8 @@ independent from the padding mode described @seclink["Padding" "elsewhere"] in t
  The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
  They are right justified in a field of at least ν characters. Examples:
 
- @space-note
+ @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+    In the results proper they are spaces, of course.}}}
  @code{((fmt "*E10.3.2") 2/3 2.3e-2)} → @code{"◦6.667e-01◦2.300e-02"}@(linebreak)
  @code{((fmt "E.5") 2/3)} → @code{"6.66667e-1"}@(linebreak)
  @code{((fmt "E15.5.4") 2/3)} → @code{"◦◦6.66667e-0001"}@(linebreak)
@@ -634,7 +642,8 @@ use @racket[number->string] to convert the absolute value and
 display the result according to the current padding and sign mode.
 The exceptional numbers @code{±inf.0} and @code{±nan.0} are treated specially.
 
-@space-note
+@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "H") 20/31)} → @code{"14/1f"}@(linebreak)
 @code{((fmt "D") 20/31)} → @code{"20/31"}@(linebreak)
@@ -725,11 +734,11 @@ reposition of the write head.
  @red{Warning}:
  after restoring, new lines produced by ξ become part of the original current line.}
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "T10 D T6 D T2 D &R4D") 1 2 3 4)} → @code{"◦◦3◦◦◦2◦◦◦1◦◦◦4"}@(linebreak)
 @code{((fmt "*(T#D)") 1 1 4 4 3 3 5 5 2 2 6 6 7 7 0 0)} → @code{"01234567"}
-@code{((fmt "'a'>3'b'<3'c'"))} → @code{"a◦c◦b"}
 
 @subsection[#:tag "condition" "Conditional instructions"]
 
@@ -754,7 +763,8 @@ Examples: @space-note
  An exception is raised if the index is greater than or equal to
  the number of instructions in  @larger["ξ ..."].}
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 @code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}@(linebreak)
 @code{((fmt "!(*(D!X)/)"))} → @code{""}@(linebreak)
 @code{((fmt "*({'zero' 'one' 'two'}!x)") 2 1 0)} → @code{"two◦one◦zero"}@(linebreak)
@@ -771,7 +781,8 @@ Examples: @space-note
 
  Instruction ξ is executed ν times.}
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "R3 4D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
 @code{((fmt "R3 *D")     1 2 3 4)} → @code{"◦◦1◦◦2◦◦3◦◦4"}@(linebreak)
@@ -786,7 +797,8 @@ Examples:
 
 @scheme[((fmt "_8.3'a' 'b'"))] → @code{"aaabaaabaa"}
 
-@space-note
+@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 @scheme[((fmt 'current "U_#3(DX)/|'fin'") (list 1 2 3 4 5 6 7 8))] → void, displays:@linebreak[]
 @code{1◦2◦3◦}@linebreak[]
 @code{4◦5◦6◦}@linebreak[]
@@ -832,18 +844,12 @@ follow. In the following example it does insert a line-break.
  [] produces an empty string.
  @red{Warning}: new lines produced by ξ ... become part of the original current line.}
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "!(*(D!X)/)") 1 2 3 4)} → @code{"1◦2◦3◦4\n"}@(linebreak)
 @code{((fmt "L3 [*D] C20 D") 1 2 3 4)} → @code{"◦◦◦◦◦1◦◦2◦◦3◦◦4◦◦◦◦◦"}@(linebreak)
 @code{((fmt "['123'/'456'] D T3 '|'"))} → @code{"123|456"}
-
-An opening parenthesis, square bracket or curly brace can be balanced by a closing parenthesis,
-square bracket or curly brace in a @italic{@tt{format}}-argument yet to follow:
-
-@code{((fmt "*({'zero'" "'one'" "'two'" "}!x)") 2 1 0)} → @code{"two one zero"}@(linebreak)
-@(hspace 3)does the same as:@(linebreak)
-@code{((fmt "*({'zero' 'one' 'two'}!x)") 2 1 0)} → @code{"two one zero"}
 
 @subsection{Miscellaneous instructions}
 
@@ -911,7 +917,8 @@ square bracket or curly brace in a @italic{@tt{format}}-argument yet to follow:
 
 Examples (assuming Windows XP or Windows 7 in time zone +0100)
 
-@space-note
+@margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "G") 0)} → @code{"Thu,◦01◦Jan◦1970◦01:00:00◦+0100"}@(linebreak)
 @code{((fmt "^'0' G"))}  Same as: @code{((fmt "G") 0)}@(linebreak)
@@ -1017,7 +1024,8 @@ An element that causes a cycle is not unfolded.
  The number is consumed and its @code{magnitude} and @code{angle} are added to the remaining data.
  The magnitude and angle of exact zero are zero.}
 
-Examples: @space-note
+Examples: @margin-note{@element["sroman"]{@smaller{`◦´ is used to show spaces.
+   In the results proper they are spaces, of course.}}}
 
 @code{((fmt "U#(DX)") '(a b c d))} → @code{"a◦b◦c◦d◦"}@(linebreak)
 @code{((fmt "U*(DX)") '(a b c d))} → @code{"4◦a◦b◦c◦d◦"}@(linebreak)
@@ -1039,8 +1047,7 @@ where @code{18014398509481984} = @code{(expt 2 54)}.
 
 @Interaction/no-prompt[
  ((fmt "\\dxd") 0)
- ((fmt "\\dxd") 0.0)
- ((fmt "\\dxd") -0.0)]
+ ((fmt "\\dxd") 0.0)]
 
 @subsection{Procedure calls}
 
@@ -1100,48 +1107,39 @@ Procedure @code{print-bill} accepts a list of entries, each entry being a list o
 the name of an article, how many pieces of this article are bought and the price per piece.
 The purpose of the procedure is to display a detailed bill.
 
-@racketblock[
+@interaction[
+ (require format/fmt)
+ (code:line)
  (define print-bill
    (let
-       ((line "N40('-')/")
-        (headers "R10'article','number','price pp','total'/")
-        (data "R10U#(USUS2D2F10.2/)")
-        (code:comment @#,t{"US" means: unfold and skip element count})
-        (grand-total "R30'grand total'F10.2/"))
+     ((line "N40('-')/")
+      (headers "R10'article','number','price pp','total'/")
+      (data "R10U#(USUS2D2F10.2/)")
+      (code:comment @#,t{"US" means: unfold and skip element count})
+      (grand-total "R30'grand total'F10.2/"))
      (let
-         ((fmt-proc
-            (fmt "/" line headers line data line grand-total line 'current)))
+       ((fmt-proc
+          (fmt "/" line headers line data line grand-total line 'current)))
        (lambda (table)
          (let*
-             ((totals (map (λ (x) (* (cadr x) (caddr x))) table))
-              (grand-total (apply + totals)))
+           ((totals (map (λ (x) (* (cadr x) (caddr x))) table))
+            (grand-total (apply + totals)))
            (fmt-proc (map list table totals) grand-total))))))
- 
+ (code:line)
  (print-bill '((chair 4 50) (table 1 100) (pillow 4 10)))]
-
-→ void and displays:
-
-@verbatim{
-----------------------------------------
-   article    number  price pp     total
-----------------------------------------
-     chair         4     50.00    200.00
-     table         1    100.00    100.00
-    pillow         4     10.00     40.00
-----------------------------------------
-                   grand total    340.00
-----------------------------------------}
 
 @subsection{Triangle of Pascal}
 
 In this example padding C is used in order to form a triangle of Pascal
 with its base at the bottom and all other lines centred above the bottom line.
 
-@racketblock[
+@interaction[
+ (require format/fmt)
+ (code:line)
  (define binomials
    (let
-       ((fmt-row (fmt "R5 D US C4 [*D] C45 D"))
-        (fmt-table (fmt "/U#(D/)" 'current)))
+     ((fmt-row (fmt "R5 D US C4 [*D] C45 D"))
+      (fmt-table (fmt "/U#(D/)" 'current)))
      (define (make-next-row order prev-row)
        (list->vector
          (cons 1
@@ -1156,22 +1154,8 @@ with its base at the bottom and all other lines centred above the bottom line.
            (cons (fmt-row order row)
              (if (>= order n)  '( )
                (loop (add1 order) (make-next-row order row)))))))))
- 
+ (code:line)
  (binomials 9)]
-
-→ void and displays:
-
-@verbatim{
- 0                      1                      
- 1                    1   1                    
- 2                  1   2   1                  
- 3                1   3   3   1                
- 4              1   4   6   4   1              
- 5            1   5  10  10   5   1            
- 6          1   6  15  20  15   6   1          
- 7        1   7  21  35  35  21   7   1        
- 8      1   8  28  56  70  56  28   8   1      
- 9    1   9  36  84  126 126 84  36   9   1  }
 
 @section[#:tag "synopsis"]{Synopsis}
 
